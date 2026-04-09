@@ -1,0 +1,30 @@
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Build and coverage
+build/
+dist/
+coverage/
+htmlcov/
+
+# Generated repository artifacts
+reports/generated/
+datasets/generated/
+*.log
+*.tmp
