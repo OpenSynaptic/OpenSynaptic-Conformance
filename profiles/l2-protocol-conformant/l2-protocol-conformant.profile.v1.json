@@ -20,40 +20,21 @@
   ],
   "requirements": [
     {
-      "id": "cross-implementation-exchange",
-      "type": "procedure",
-      "title": "Cross-implementation frame exchange",
-      "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
+      "id": "interoperability-canonical-dataset",
+      "type": "dataset",
+      "title": "Interoperability canonical dataset",
+      "path": "../../datasets/canonical/l2-interoperability.dataset.v1.json",
       "requiredCases": [
         "L2-XENC-01",
         "L2-XENC-02",
         "L2-XENC-03",
         "L2-XENC-04",
         "L2-XENC-05",
-        "L2-XENC-06"
-      ]
-    },
-    {
-      "id": "multi-sensor-exchange",
-      "type": "procedure",
-      "title": "Multi-sensor frame exchange",
-      "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
-      "appliesTo": [
-        "core",
-        "fx"
-      ],
-      "requiredCases": [
-        "L2-MULTI-01"
-      ]
-    },
-    {
-      "id": "crc-cross-check",
-      "type": "procedure",
-      "title": "CRC cross verification across implementations",
-      "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
-      "requiredCases": [
+        "L2-XENC-06",
+        "L2-MULTI-01",
         "L2-CRC-CROSS-01"
-      ]
+      ],
+      "note": "Detailed procedural narrative remains in the certification document, while this dataset manifest is the machine-readable source for L2 case ids and expectations."
     }
   ],
   "execution": {

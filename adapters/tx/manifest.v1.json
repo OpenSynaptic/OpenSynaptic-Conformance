@@ -1,0 +1,83 @@
+{
+  "$schema": "../../schemas/adapter-manifest.schema.json",
+  "kind": "adapter-manifest",
+  "schemaVersion": "1.0.0",
+  "adapterId": "osynaptic-tx",
+  "version": "1.0.0",
+  "title": "OSynaptic-TX Adapter Manifest",
+  "status": "planned",
+  "implementation": {
+    "name": "OSynaptic-TX",
+    "repository": "https://github.com/OpenSynaptic/OSynaptic-TX",
+    "language": "C89",
+    "target": "encode-only-runtime"
+  },
+  "roles": [
+    "producer"
+  ],
+  "supportedProfiles": [
+    "opensynaptic.l1-wire-compatible",
+    "opensynaptic.l2-protocol-conformant"
+  ],
+  "capabilities": {
+    "encodeModes": [
+      "full"
+    ],
+    "decodeModes": [],
+    "security": false,
+    "ucumStandardization": false,
+    "notes": [
+      "TX remains a producer-side participant for L1 and L2.",
+      "Fusion and security profiles are not applicable to TX-only deployments."
+    ]
+  },
+  "interface": {
+    "protocolVersion": "1.0.0",
+    "transport": "cli-json-v1",
+    "requiredCommands": [
+      {
+        "name": "info",
+        "purpose": "Emit adapter identity for the encode-only target.",
+        "stdoutKind": "adapter-info"
+      },
+      {
+        "name": "capabilities",
+        "purpose": "Emit supported producer roles and packet limitations.",
+        "stdoutKind": "capabilities"
+      },
+      {
+        "name": "run-profile",
+        "purpose": "Execute a complete profile when that profile is applicable to TX.",
+        "stdoutKind": "conformance-report"
+      },
+      {
+        "name": "run-cases",
+        "purpose": "Execute selected cases only.",
+        "stdoutKind": "conformance-report"
+      }
+    ],
+    "stdout": {
+      "format": "json",
+      "reportSchemaPath": "../../schemas/report.schema.json",
+      "note": "The adapter may wrap host-side CMake tests or a minimal CLI wrapper around packet assembly routines."
+    },
+    "exitCodes": [
+      {
+        "code": 0,
+        "meaning": "Successful execution; report emitted."
+      },
+      {
+        "code": 1,
+        "meaning": "Profile failure with report emitted."
+      },
+      {
+        "code": 2,
+        "meaning": "Usage or argument error."
+      },
+      {
+        "code": 3,
+        "meaning": "Adapter runtime failure or unavailable toolchain."
+      }
+    ]
+  }
+}

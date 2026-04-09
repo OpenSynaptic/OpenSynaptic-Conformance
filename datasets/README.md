@@ -17,3 +17,11 @@ Repository policy:
 Current dataset directories:
 
 - [Canonical datasets](canonical/README.md)
+- [Exhaustive datasets](exhaustive/README.md)
+
+Current seeded manifests:
+
+- [L2 interoperability dataset](canonical/l2-interoperability.dataset.v1.json)
+- [L3 fusion dataset](canonical/l3-fusion.dataset.v1.json)
+- [L4 security dataset](canonical/l4-security.dataset.v1.json)
+- [L5 ecosystem dataset](exhaustive/l5-full-ecosystem.dataset.v1.json)

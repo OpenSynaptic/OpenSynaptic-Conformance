@@ -1,0 +1,89 @@
+{
+  "$schema": "../../schemas/dataset-manifest.schema.json",
+  "kind": "dataset-manifest",
+  "schemaVersion": "1.0.0",
+  "datasetId": "opensynaptic.l5.full-ecosystem.exhaustive",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L5 Full Ecosystem Exhaustive Dataset",
+  "description": "Aggregate manifest describing the exhaustive suite groups used for L5 ecosystem certification.",
+  "datasetClass": "exhaustive",
+  "source": {
+    "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
+    "section": "7. L5 Full Ecosystem 认证"
+  },
+  "appliesTo": [
+    "core",
+    "fx",
+    "third-party"
+  ],
+  "cases": [
+    {
+      "id": "L5-SUITE-01",
+      "title": "Exhaustive business logic suites A-F",
+      "category": "aggregate-suite",
+      "input": {
+        "sourceScript": "OpenSynaptic/scripts/exhaustive_business_logic.py",
+        "suiteNames": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F"
+        ]
+      },
+      "expected": {
+        "nominalTotal": 985,
+        "minimumPassRate": 0.995,
+        "maximumKnownSkips": 2
+      }
+    },
+    {
+      "id": "L5-SUITE-02",
+      "title": "Plugin system suite",
+      "category": "aggregate-suite",
+      "input": {
+        "subsystems": [
+          "DatabaseManager SQLite",
+          "PortForwarder rules",
+          "TestPlugin",
+          "DisplayAPI",
+          "Plugin registry"
+        ]
+      },
+      "expected": {
+        "nominalTotal": 205,
+        "minimumPassRate": 1.0
+      }
+    },
+    {
+      "id": "L5-SUITE-03",
+      "title": "Security infrastructure suite",
+      "category": "aggregate-suite",
+      "input": {
+        "subsystems": [
+          "ID allocator",
+          "Handshake state machine",
+          "Environment guard",
+          "Port forwarder security"
+        ]
+      },
+      "expected": {
+        "nominalTotal": 43,
+        "minimumPassRate": 1.0
+      }
+    },
+    {
+      "id": "L5-SUITE-04",
+      "title": "Orthogonal design suite",
+      "category": "aggregate-suite",
+      "input": {
+        "description": "Cross-feature interaction and non-regression checks."
+      },
+      "expected": {
+        "nominalTotal": 24,
+        "minimumPassRate": 1.0
+      }
+    }
+  ]
+}

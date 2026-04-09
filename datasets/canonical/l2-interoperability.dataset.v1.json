@@ -1,0 +1,229 @@
+{
+  "$schema": "../../schemas/dataset-manifest.schema.json",
+  "kind": "dataset-manifest",
+  "schemaVersion": "1.0.0",
+  "datasetId": "opensynaptic.l2.interoperability.canonical",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L2 Interoperability Canonical Dataset",
+  "description": "Canonical cross-implementation exchange cases for L2 protocol conformance.",
+  "datasetClass": "canonical",
+  "source": {
+    "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
+    "section": "4. L2 Protocol Conformant 认证"
+  },
+  "appliesTo": [
+    "core",
+    "fx",
+    "rx",
+    "tx",
+    "third-party"
+  ],
+  "cases": [
+    {
+      "id": "L2-XENC-01",
+      "title": "TX encode to Core decode",
+      "category": "cross-implementation",
+      "appliesTo": [
+        "tx",
+        "core"
+      ],
+      "input": {
+        "producer": "tx",
+        "consumer": "core",
+        "aidHex": "0x00010203",
+        "tid": 7,
+        "tsSec": 1710000000,
+        "sensor": {
+          "sensorId": "T1",
+          "unit": "A01",
+          "scaled": 215000
+        }
+      },
+      "expected": {
+        "mustDecode": true,
+        "cmdHex": "0x3F",
+        "aidHex": "0x00010203",
+        "tid": 7,
+        "sensorId": "T1",
+        "unit": "A01",
+        "scaled": 215000
+      }
+    },
+    {
+      "id": "L2-XENC-02",
+      "title": "TX encode to RX decode",
+      "category": "cross-implementation",
+      "appliesTo": [
+        "tx",
+        "rx"
+      ],
+      "input": {
+        "producer": "tx",
+        "consumer": "rx",
+        "aidHex": "0x00010203",
+        "tid": 7,
+        "tsSec": 1710000000,
+        "sensor": {
+          "sensorId": "T1",
+          "unit": "A01",
+          "scaled": 215000
+        }
+      },
+      "expected": {
+        "mustDecode": true,
+        "cmdHex": "0x3F",
+        "aidHex": "0x00010203",
+        "tid": 7,
+        "sensorId": "T1",
+        "unit": "A01",
+        "scaled": 215000
+      }
+    },
+    {
+      "id": "L2-XENC-03",
+      "title": "FX encode to Core decode",
+      "category": "cross-implementation",
+      "appliesTo": [
+        "fx",
+        "core"
+      ],
+      "input": {
+        "producer": "fx",
+        "consumer": "core",
+        "sensor": {
+          "sensorId": "T1",
+          "value": 21.5,
+          "unit": "Cel"
+        }
+      },
+      "expected": {
+        "mustDecode": true,
+        "relativeTolerance": 0.001
+      }
+    },
+    {
+      "id": "L2-XENC-04",
+      "title": "FX encode to RX decode",
+      "category": "cross-implementation",
+      "appliesTo": [
+        "fx",
+        "rx"
+      ],
+      "input": {
+        "producer": "fx",
+        "consumer": "rx",
+        "sensor": {
+          "sensorId": "T1",
+          "value": 21.5,
+          "unit": "Cel"
+        }
+      },
+      "expected": {
+        "mustDecode": true,
+        "scaled": 215000
+      }
+    },
+    {
+      "id": "L2-XENC-05",
+      "title": "Core encode to FX decode",
+      "category": "cross-implementation",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "producer": "core",
+        "consumer": "fx",
+        "sensor": {
+          "sensorId": "T1",
+          "value": 21.5,
+          "unit": "Cel"
+        },
+        "deviceId": "TEST",
+        "deviceStatus": "ONLINE"
+      },
+      "expected": {
+        "mustDecode": true,
+        "note": "Normalized unit comparison may require reverse standardization."
+      }
+    },
+    {
+      "id": "L2-XENC-06",
+      "title": "Core encode to RX decode",
+      "category": "cross-implementation",
+      "appliesTo": [
+        "core",
+        "rx"
+      ],
+      "input": {
+        "producer": "core",
+        "consumer": "rx",
+        "sensor": {
+          "sensorId": "T1",
+          "value": 21.5,
+          "unit": "Cel"
+        }
+      },
+      "expected": {
+        "mustDecode": true,
+        "crc8Ok": true,
+        "crc16Ok": true
+      }
+    },
+    {
+      "id": "L2-MULTI-01",
+      "title": "FX multi-sensor encode to Core decode",
+      "category": "multi-sensor",
+      "appliesTo": [
+        "fx",
+        "core"
+      ],
+      "input": {
+        "producer": "fx",
+        "consumer": "core",
+        "sensors": [
+          [
+            "T1",
+            "OK",
+            21.5,
+            "Cel"
+          ],
+          [
+            "H1",
+            "OK",
+            55.0,
+            "%"
+          ],
+          [
+            "P1",
+            "OK",
+            101.325,
+            "kPa"
+          ]
+        ]
+      },
+      "expected": {
+        "mustDecode": true,
+        "minimumSensorCount": 3
+      }
+    },
+    {
+      "id": "L2-CRC-CROSS-01",
+      "title": "CRC cross verification on exchanged frames",
+      "category": "crc-cross-check",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx",
+        "tx"
+      ],
+      "input": {
+        "description": "Implementation A emits a frame and implementation B recomputes CRC over the same bytes."
+      },
+      "expected": {
+        "crc8Equal": true,
+        "crc16Equal": true
+      }
+    }
+  ]
+}

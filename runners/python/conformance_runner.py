@@ -40,6 +40,31 @@ REQUIRED_VECTOR_SET_KEYS = {
     "vectors",
 }
 REQUIRED_VECTOR_KEYS = {"id", "operation", "appliesTo", "input", "expected"}
+REQUIRED_DATASET_KEYS = {
+    "kind",
+    "schemaVersion",
+    "datasetId",
+    "version",
+    "title",
+    "description",
+    "datasetClass",
+    "source",
+    "cases",
+}
+REQUIRED_DATASET_CASE_KEYS = {"id", "title", "category"}
+REQUIRED_ADAPTER_KEYS = {
+    "kind",
+    "schemaVersion",
+    "adapterId",
+    "version",
+    "title",
+    "status",
+    "implementation",
+    "roles",
+    "supportedProfiles",
+    "interface",
+}
+REQUIRED_ADAPTER_COMMAND_KEYS = {"name", "purpose", "stdoutKind"}
 
 
 @dataclass
@@ -58,14 +83,19 @@ class AssetValidator:
         self.root = root
         self.assets: dict[str, AssetStatus] = {}
         self.vector_sets: dict[Path, dict[str, Any]] = {}
+        self.dataset_manifests: dict[Path, dict[str, Any]] = {}
         self.profiles: dict[Path, dict[str, Any]] = {}
+        self.adapter_manifests: dict[Path, dict[str, Any]] = {}
         self.schemas: dict[Path, dict[str, Any]] = {}
 
     def validate(self) -> tuple[dict[str, AssetStatus], dict[str, Any]]:
         self._load_schemas()
         self._load_vector_sets()
+        self._load_dataset_manifests()
         self._load_profiles()
+        self._load_adapter_manifests()
         self._validate_profile_cross_references()
+        self._validate_adapter_cross_references()
         report = self._build_report()
         return self.assets, report
 
@@ -80,6 +110,12 @@ class AssetValidator:
         for path in sorted((self.root / "vectors").rglob("*.json")):
             data = self._load_json(path)
             asset_map["vectors"].append((self._rel(path), str(data.get("vectorSetId", ""))))
+        for path in sorted((self.root / "datasets").rglob("*.json")):
+            data = self._load_json(path)
+            asset_map["datasets"].append((self._rel(path), str(data.get("datasetId", ""))))
+        for path in sorted((self.root / "adapters").rglob("*.json")):
+            data = self._load_json(path)
+            asset_map["adapters"].append((self._rel(path), str(data.get("adapterId", ""))))
         return asset_map
 
     def _load_schemas(self) -> None:
@@ -152,10 +188,94 @@ class AssetValidator:
                 else:
                     seen_ids[profile_id] = rel
 
+    def _load_dataset_manifests(self) -> None:
+        seen_ids: dict[str, str] = {}
+        for path in sorted((self.root / "datasets").rglob("*.json")):
+            rel = self._rel(path)
+            data = self._safe_load(path, "dataset-manifest")
+            if data is None:
+                continue
+            self.dataset_manifests[path] = data
+            self._validate_schema_ref(path, data)
+            missing = REQUIRED_DATASET_KEYS.difference(data)
+            if missing:
+                self._error(rel, f"missing required dataset-manifest keys: {sorted(missing)}")
+            if data.get("kind") != "dataset-manifest":
+                self._error(rel, f"unexpected kind: {data.get('kind')!r}")
+            dataset_id = data.get("datasetId")
+            if dataset_id:
+                if dataset_id in seen_ids:
+                    self._error(rel, f"duplicate datasetId also used by {seen_ids[dataset_id]}")
+                else:
+                    seen_ids[dataset_id] = rel
+
+            source = data.get("source")
+            if not isinstance(source, dict) or not isinstance(source.get("path"), str):
+                self._error(rel, "dataset manifest source.path is missing or invalid")
+            else:
+                source_path = self._resolve_relative(path, source["path"])
+                if source_path is None or not source_path.exists():
+                    target = source["path"] if source_path is None else self._rel(source_path)
+                    self._error(rel, f"broken dataset source path: {target}")
+
+            seen_case_ids: set[str] = set()
+            for entry in data.get("cases", []):
+                missing_case_keys = REQUIRED_DATASET_CASE_KEYS.difference(entry)
+                if missing_case_keys:
+                    self._error(rel, f"dataset case missing keys: {sorted(missing_case_keys)}")
+                    continue
+                case_id = entry["id"]
+                if case_id in seen_case_ids:
+                    self._error(rel, f"duplicate dataset case id: {case_id}")
+                seen_case_ids.add(case_id)
+
+    def _load_adapter_manifests(self) -> None:
+        seen_ids: dict[str, str] = {}
+        for path in sorted((self.root / "adapters").rglob("*.json")):
+            rel = self._rel(path)
+            data = self._safe_load(path, "adapter-manifest")
+            if data is None:
+                continue
+            self.adapter_manifests[path] = data
+            self._validate_schema_ref(path, data)
+            missing = REQUIRED_ADAPTER_KEYS.difference(data)
+            if missing:
+                self._error(rel, f"missing required adapter-manifest keys: {sorted(missing)}")
+            if data.get("kind") != "adapter-manifest":
+                self._error(rel, f"unexpected kind: {data.get('kind')!r}")
+            adapter_id = data.get("adapterId")
+            if adapter_id:
+                if adapter_id in seen_ids:
+                    self._error(rel, f"duplicate adapterId also used by {seen_ids[adapter_id]}")
+                else:
+                    seen_ids[adapter_id] = rel
+
+            interface = data.get("interface", {})
+            stdout_ref = interface.get("stdout", {}).get("reportSchemaPath")
+            report_schema_path = self._resolve_relative(path, stdout_ref)
+            if report_schema_path is None or not report_schema_path.exists():
+                target = stdout_ref if report_schema_path is None else self._rel(report_schema_path)
+                self._error(rel, f"broken adapter report schema path: {target}")
+
+            seen_command_names: set[str] = set()
+            for command in interface.get("requiredCommands", []):
+                missing_command_keys = REQUIRED_ADAPTER_COMMAND_KEYS.difference(command)
+                if missing_command_keys:
+                    self._error(rel, f"adapter command missing keys: {sorted(missing_command_keys)}")
+                    continue
+                command_name = command["name"]
+                if command_name in seen_command_names:
+                    self._error(rel, f"duplicate adapter command name: {command_name}")
+                seen_command_names.add(command_name)
+
     def _validate_profile_cross_references(self) -> None:
         vector_index = {
             self._rel(path): {entry["id"] for entry in data.get("vectors", []) if "id" in entry}
             for path, data in self.vector_sets.items()
+        }
+        dataset_index = {
+            self._rel(path): {entry["id"] for entry in data.get("cases", []) if "id" in entry}
+            for path, data in self.dataset_manifests.items()
         }
 
         for path, profile in self.profiles.items():
@@ -188,11 +308,28 @@ class AssetValidator:
                     missing_cases = sorted(required_cases.difference(known_cases))
                     if missing_cases:
                         self._error(rel, f"requirement {req_id} references unknown vector ids: {missing_cases}")
+                if requirement.get("type") == "dataset":
+                    target_rel = self._rel(target)
+                    known_cases = dataset_index.get(target_rel)
+                    if known_cases is None:
+                        self._error(rel, f"requirement {req_id} points to non-loaded dataset manifest {target_rel}")
+                        continue
+                    missing_cases = sorted(required_cases.difference(known_cases))
+                    if missing_cases:
+                        self._error(rel, f"requirement {req_id} references unknown dataset case ids: {missing_cases}")
 
             for pair in profile.get("execution", {}).get("requiredPairs", []):
                 missing_cases = sorted(set(pair.get("cases", [])).difference(required_cases_union))
                 if missing_cases:
                     self._error(rel, f"execution pair references cases not declared in requirements: {missing_cases}")
+
+    def _validate_adapter_cross_references(self) -> None:
+        known_profile_ids = {data.get("profileId") for data in self.profiles.values() if data.get("profileId")}
+        for path, manifest in self.adapter_manifests.items():
+            rel = self._rel(path)
+            missing_profiles = sorted(set(manifest.get("supportedProfiles", [])).difference(known_profile_ids))
+            if missing_profiles:
+                self._error(rel, f"supportedProfiles reference unknown profile ids: {missing_profiles}")
 
     def _build_report(self) -> dict[str, Any]:
         results: list[dict[str, Any]] = []
@@ -310,7 +447,7 @@ class AssetValidator:
 def command_list_assets(root: Path) -> int:
     validator = AssetValidator(root)
     asset_map = validator.list_assets()
-    for group in ("schemas", "profiles", "vectors"):
+    for group in ("schemas", "profiles", "vectors", "datasets", "adapters"):
         print(f"[{group}]")
         for rel, asset_id in asset_map.get(group, []):
             suffix = f" :: {asset_id}" if asset_id else ""

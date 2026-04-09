@@ -1,0 +1,57 @@
+{
+  "$schema": "../../schemas/profile.schema.json",
+  "kind": "conformance-profile",
+  "schemaVersion": "1.0.0",
+  "profileId": "opensynaptic.l5-full-ecosystem",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L5 Full Ecosystem",
+  "level": "L5",
+  "status": "draft",
+  "description": "Aggregate ecosystem certification profile for exhaustive business logic, plugin systems, security infrastructure, and orthogonal design coverage.",
+  "appliesTo": [
+    "core",
+    "fx",
+    "third-party"
+  ],
+  "prerequisites": [
+    "opensynaptic.l4-security-validated@>=1.0.0"
+  ],
+  "requirements": [
+    {
+      "id": "ecosystem-exhaustive-dataset",
+      "type": "dataset",
+      "title": "Full ecosystem exhaustive dataset manifest",
+      "path": "../../datasets/exhaustive/l5-full-ecosystem.dataset.v1.json",
+      "requiredCases": [
+        "L5-SUITE-01",
+        "L5-SUITE-02",
+        "L5-SUITE-03",
+        "L5-SUITE-04"
+      ]
+    }
+  ],
+  "execution": {
+    "mode": "single-implementation",
+    "note": "L5 represents ecosystem-level equivalence and is appropriate only for implementations that expose the required server-like surfaces."
+  },
+  "passCriteria": {
+    "policy": "threshold",
+    "minimumPassed": 1253,
+    "minimumPassRate": 0.995,
+    "note": "L5 accepts only known-design-limit skips and requires ecosystem-wide pass rate of at least 99.5 percent."
+  },
+  "skipPolicy": {
+    "allowed": true,
+    "note": "Skips are allowed only for documented known limits such as Base62 numeric ceilings already tracked by the certification policy."
+  },
+  "report": {
+    "schemaPath": "../../schemas/report.schema.json",
+    "requiredSummaryFields": [
+      "total",
+      "passed",
+      "failed",
+      "skipped",
+      "status"
+    ]
+  }
+}

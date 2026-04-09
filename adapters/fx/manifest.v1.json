@@ -1,0 +1,90 @@
+{
+  "$schema": "../../schemas/adapter-manifest.schema.json",
+  "kind": "adapter-manifest",
+  "schemaVersion": "1.0.0",
+  "adapterId": "osynaptic-fx",
+  "version": "1.0.0",
+  "title": "OSynaptic-FX Adapter Manifest",
+  "status": "planned",
+  "implementation": {
+    "name": "OSynaptic-FX",
+    "repository": "https://github.com/OpenSynaptic/OSynaptic-FX",
+    "language": "C99",
+    "target": "embedded-fusion-runtime"
+  },
+  "roles": [
+    "producer",
+    "consumer",
+    "fusion",
+    "security"
+  ],
+  "supportedProfiles": [
+    "opensynaptic.l1-wire-compatible",
+    "opensynaptic.l2-protocol-conformant",
+    "opensynaptic.l3-fusion-certified",
+    "opensynaptic.l4-security-validated"
+  ],
+  "capabilities": {
+    "encodeModes": [
+      "full",
+      "diff",
+      "heart"
+    ],
+    "decodeModes": [
+      "full",
+      "diff",
+      "heart"
+    ],
+    "security": true,
+    "ucumStandardization": true
+  },
+  "interface": {
+    "protocolVersion": "1.0.0",
+    "transport": "cli-json-v1",
+    "requiredCommands": [
+      {
+        "name": "info",
+        "purpose": "Emit adapter identity and build metadata for OSynaptic-FX.",
+        "stdoutKind": "adapter-info"
+      },
+      {
+        "name": "capabilities",
+        "purpose": "Emit supported packet modes, profile levels, and known compile-time limits.",
+        "stdoutKind": "capabilities"
+      },
+      {
+        "name": "run-profile",
+        "purpose": "Execute a complete profile against the OSynaptic-FX adapter target.",
+        "stdoutKind": "conformance-report"
+      },
+      {
+        "name": "run-cases",
+        "purpose": "Execute selected cases only.",
+        "stdoutKind": "conformance-report"
+      }
+    ],
+    "stdout": {
+      "format": "json",
+      "reportSchemaPath": "../../schemas/report.schema.json",
+      "note": "The concrete adapter may wrap CMake or Arduino-oriented test harnesses but must preserve JSON stdout."
+    },
+    "exitCodes": [
+      {
+        "code": 0,
+        "meaning": "Successful execution; report emitted."
+      },
+      {
+        "code": 1,
+        "meaning": "Profile failure with report emitted."
+      },
+      {
+        "code": 2,
+        "meaning": "Usage or argument error."
+      },
+      {
+        "code": 3,
+        "meaning": "Adapter runtime failure or unavailable toolchain."
+      }
+    ]
+  }
+}

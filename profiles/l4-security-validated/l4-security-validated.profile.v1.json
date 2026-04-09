@@ -1,0 +1,65 @@
+{
+  "$schema": "../../schemas/profile.schema.json",
+  "kind": "conformance-profile",
+  "schemaVersion": "1.0.0",
+  "profileId": "opensynaptic.l4-security-validated",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L4 Security Validated",
+  "level": "L4",
+  "status": "draft",
+  "description": "Handshake state-machine, replay-protection, id-allocation, and dispatch validation for security-capable implementations.",
+  "appliesTo": [
+    "core",
+    "fx",
+    "third-party"
+  ],
+  "prerequisites": [
+    "opensynaptic.l3-fusion-certified@>=1.0.0"
+  ],
+  "requirements": [
+    {
+      "id": "security-canonical-dataset",
+      "type": "dataset",
+      "title": "Security canonical dataset",
+      "path": "../../datasets/canonical/l4-security.dataset.v1.json",
+      "requiredCases": [
+        "L4-HS-01",
+        "L4-HS-02",
+        "L4-HS-03",
+        "L4-TS-01",
+        "L4-TS-02",
+        "L4-TS-03",
+        "L4-ID-01",
+        "L4-ID-02",
+        "L4-ID-03",
+        "L4-ID-04",
+        "L4-DISP-01",
+        "L4-DISP-02",
+        "L4-DISP-03"
+      ]
+    }
+  ],
+  "execution": {
+    "mode": "single-implementation",
+    "note": "L4 checks are executed within a security-capable implementation or gateway role."
+  },
+  "passCriteria": {
+    "policy": "all-required-must-pass",
+    "minimumPassed": 13,
+    "note": "L4 is zero-tolerance for handshake, anti-replay, id-allocation, and dispatch failures."
+  },
+  "skipPolicy": {
+    "allowed": false,
+    "note": "Implementations without security surfaces should not claim L4."
+  },
+  "report": {
+    "schemaPath": "../../schemas/report.schema.json",
+    "requiredSummaryFields": [
+      "total",
+      "passed",
+      "failed",
+      "skipped",
+      "status"
+    ]
+  }
+}

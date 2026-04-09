@@ -1,0 +1,272 @@
+{
+  "$schema": "../../schemas/dataset-manifest.schema.json",
+  "kind": "dataset-manifest",
+  "schemaVersion": "1.0.0",
+  "datasetId": "opensynaptic.l3.fusion.canonical",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L3 Fusion Canonical Dataset",
+  "description": "Canonical strategy, DIFF, HEART, and cross-implementation sequence cases for L3 fusion certification.",
+  "datasetClass": "canonical",
+  "source": {
+    "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
+    "section": "5. L3 Fusion Certified 认证"
+  },
+  "appliesTo": [
+    "core",
+    "fx",
+    "third-party"
+  ],
+  "cases": [
+    {
+      "id": "L3-STRAT-01",
+      "title": "FULL to DIFF to HEART strategy sequence",
+      "category": "strategy-sequence",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "sensorId": "T1",
+        "unit": "Cel",
+        "values": [
+          21.0,
+          21.5,
+          22.0,
+          22.5,
+          23.0,
+          23.0,
+          23.0,
+          23.5
+        ],
+        "targetSyncCount": 3
+      },
+      "expected": {
+        "commandSequence": [
+          63,
+          63,
+          63,
+          170,
+          170,
+          127,
+          127,
+          170
+        ]
+      }
+    },
+    {
+      "id": "L3-STRAT-02",
+      "title": "Configuration change forces FULL",
+      "category": "strategy-sequence",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "rounds": [
+          {
+            "sensors": [
+              [
+                "T1",
+                21.0,
+                "Cel"
+              ]
+            ]
+          },
+          {
+            "sensors": [
+              [
+                "T1",
+                21.5,
+                "Cel"
+              ]
+            ]
+          },
+          {
+            "sensors": [
+              [
+                "T1",
+                22.0,
+                "Cel"
+              ]
+            ]
+          },
+          {
+            "sensors": [
+              [
+                "T1",
+                22.5,
+                "Cel"
+              ],
+              [
+                "H1",
+                55.0,
+                "%"
+              ]
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "fourthCommand": 63
+      }
+    },
+    {
+      "id": "L3-DIFF-01",
+      "title": "Single-channel DIFF bitmask",
+      "category": "diff-bitmask",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "baseline": [
+          [
+            "T1",
+            21.0,
+            "Cel"
+          ],
+          [
+            "H1",
+            55.0,
+            "%"
+          ],
+          [
+            "P1",
+            101325,
+            "Pa"
+          ]
+        ],
+        "changed": [
+          [
+            "T1",
+            21.5,
+            "Cel"
+          ],
+          [
+            "H1",
+            55.0,
+            "%"
+          ],
+          [
+            "P1",
+            101325,
+            "Pa"
+          ]
+        ]
+      },
+      "expected": {
+        "bitmaskHex": "0x01",
+        "changedChannels": [
+          "T1"
+        ]
+      }
+    },
+    {
+      "id": "L3-DIFF-02",
+      "title": "Multi-channel DIFF bitmask",
+      "category": "diff-bitmask",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "baseline": [
+          [
+            "T1",
+            21.0,
+            "Cel"
+          ],
+          [
+            "H1",
+            55.0,
+            "%"
+          ],
+          [
+            "P1",
+            101325,
+            "Pa"
+          ]
+        ],
+        "changed": [
+          [
+            "T1",
+            22.0,
+            "Cel"
+          ],
+          [
+            "H1",
+            60.0,
+            "%"
+          ],
+          [
+            "P1",
+            101325,
+            "Pa"
+          ]
+        ]
+      },
+      "expected": {
+        "bitmaskHex": "0x03",
+        "changedChannels": [
+          "T1",
+          "H1"
+        ]
+      }
+    },
+    {
+      "id": "L3-HEART-01",
+      "title": "HEART replay on unchanged values",
+      "category": "heart-replay",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "rounds": [
+          {
+            "command": "FULL",
+            "value": 21.0
+          },
+          {
+            "command": "DIFF",
+            "value": 21.5
+          },
+          {
+            "command": "HEART",
+            "value": 21.5
+          }
+        ]
+      },
+      "expected": {
+        "heartCommand": 127,
+        "heartBodyContainsTimestampOnly": true,
+        "replayedPayloadMatchesPrevious": true
+      }
+    },
+    {
+      "id": "L3-CROSS-01",
+      "title": "FX and Core strategy sequences are identical",
+      "category": "cross-implementation",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "sequenceCase": "L3-STRAT-01"
+      },
+      "expected": {
+        "fxCommandSequenceEqualsCoreCommandSequence": true,
+        "commandSequence": [
+          63,
+          63,
+          63,
+          170,
+          170,
+          127,
+          127,
+          170
+        ]
+      }
+    }
+  ]
+}

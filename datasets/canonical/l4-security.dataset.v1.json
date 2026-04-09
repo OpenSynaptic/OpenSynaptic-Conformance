@@ -1,0 +1,208 @@
+{
+  "$schema": "../../schemas/dataset-manifest.schema.json",
+  "kind": "dataset-manifest",
+  "schemaVersion": "1.0.0",
+  "datasetId": "opensynaptic.l4.security.canonical",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L4 Security Canonical Dataset",
+  "description": "Canonical handshake, replay-protection, id-allocation, and dispatch cases for L4 security validation.",
+  "datasetClass": "canonical",
+  "source": {
+    "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
+    "section": "6. L4 Security Validated 认证"
+  },
+  "appliesTo": [
+    "core",
+    "fx",
+    "third-party"
+  ],
+  "cases": [
+    {
+      "id": "L4-HS-01",
+      "title": "Full handshake path",
+      "category": "handshake",
+      "input": {
+        "aid": "X",
+        "statePath": [
+          "INIT",
+          "PLAINTEXT_SENT",
+          "DICT_READY",
+          "SECURE"
+        ]
+      },
+      "expected": {
+        "shouldEncrypt": true,
+        "keyLengthBytes": 32,
+        "keyAllZero": false
+      }
+    },
+    {
+      "id": "L4-HS-02",
+      "title": "Multiple AIDs remain isolated",
+      "category": "handshake",
+      "input": {
+        "aidCount": 5
+      },
+      "expected": {
+        "isolatedStateMachines": true
+      }
+    },
+    {
+      "id": "L4-HS-03",
+      "title": "Session expiry returns to INIT",
+      "category": "handshake",
+      "input": {
+        "expireSeconds": 60
+      },
+      "expected": {
+        "finalState": "INIT"
+      }
+    },
+    {
+      "id": "L4-TS-01",
+      "title": "Strictly increasing timestamps are accepted",
+      "category": "timestamp",
+      "input": {
+        "timestamps": [
+          1000,
+          1001,
+          1002
+        ]
+      },
+      "expected": {
+        "results": [
+          "ACCEPT",
+          "ACCEPT",
+          "ACCEPT"
+        ]
+      }
+    },
+    {
+      "id": "L4-TS-02",
+      "title": "Replay timestamp is rejected",
+      "category": "timestamp",
+      "input": {
+        "timestamps": [
+          1000,
+          1000
+        ]
+      },
+      "expected": {
+        "results": [
+          "ACCEPT",
+          "REPLAY"
+        ]
+      }
+    },
+    {
+      "id": "L4-TS-03",
+      "title": "Out-of-order timestamp is rejected",
+      "category": "timestamp",
+      "input": {
+        "timestamps": [
+          1002,
+          1001
+        ]
+      },
+      "expected": {
+        "results": [
+          "ACCEPT",
+          "OUT_OF_ORDER"
+        ]
+      }
+    },
+    {
+      "id": "L4-ID-01",
+      "title": "Sequential allocation yields unique IDs",
+      "category": "id-allocation",
+      "input": {
+        "range": [
+          1,
+          9999
+        ],
+        "count": 200
+      },
+      "expected": {
+        "uniqueCount": 200,
+        "withinRange": true
+      }
+    },
+    {
+      "id": "L4-ID-02",
+      "title": "Pool exhaustion is surfaced",
+      "category": "id-allocation",
+      "input": {
+        "range": [
+          1,
+          3
+        ],
+        "attempts": 4
+      },
+      "expected": {
+        "successfulAllocations": 3,
+        "fourthAttempt": "FAIL"
+      }
+    },
+    {
+      "id": "L4-ID-03",
+      "title": "Expired lease can be reclaimed",
+      "category": "id-allocation",
+      "input": {
+        "leaseSeconds": 60
+      },
+      "expected": {
+        "idReusable": true
+      }
+    },
+    {
+      "id": "L4-ID-04",
+      "title": "Concurrent allocation has no duplicates",
+      "category": "id-allocation",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "threads": 20
+      },
+      "expected": {
+        "duplicateCount": 0,
+        "raceConditionExceptions": 0
+      }
+    },
+    {
+      "id": "L4-DISP-01",
+      "title": "Malformed short frame is rejected",
+      "category": "dispatch",
+      "input": {
+        "length": 3
+      },
+      "expected": {
+        "rejectReason": "MALFORMED"
+      }
+    },
+    {
+      "id": "L4-DISP-02",
+      "title": "CRC failure is rejected",
+      "category": "dispatch",
+      "input": {
+        "mutation": "flip-last-byte"
+      },
+      "expected": {
+        "rejectReason": "CRC"
+      }
+    },
+    {
+      "id": "L4-DISP-03",
+      "title": "PING produces PONG response",
+      "category": "dispatch",
+      "input": {
+        "cmdHex": "0x09"
+      },
+      "expected": {
+        "responseCmdHex": "0x0A",
+        "hasResponse": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OpenSynaptic/OpenSynaptic-Conformance/blob/main/schemas/adapter-manifest.schema.json",
+  "title": "OpenSynaptic Adapter Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "schemaVersion",
+    "adapterId",
+    "version",
+    "title",
+    "status",
+    "implementation",
+    "roles",
+    "supportedProfiles",
+    "interface"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "kind": {
+      "const": "adapter-manifest"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "adapterId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "active",
+        "deprecated"
+      ]
+    },
+    "implementation": {
+      "$ref": "#/$defs/implementation"
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "producer",
+          "consumer",
+          "fusion",
+          "security",
+          "ecosystem"
+        ]
+      }
+    },
+    "supportedProfiles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "interface": {
+      "$ref": "#/$defs/interface"
+    },
+    "note": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "repository",
+        "language",
+        "target"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "interface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "transport",
+        "requiredCommands",
+        "stdout",
+        "exitCodes"
+      ],
+      "properties": {
+        "protocolVersion": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "transport": {
+          "type": "string",
+          "const": "cli-json-v1"
+        },
+        "requiredCommands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/command"
+          }
+        },
+        "stdout": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "format",
+            "reportSchemaPath"
+          ],
+          "properties": {
+            "format": {
+              "type": "string",
+              "const": "json"
+            },
+            "reportSchemaPath": {
+              "type": "string",
+              "minLength": 1
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "exitCodes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/exitCode"
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "purpose",
+        "stdoutKind"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stdoutKind": {
+          "type": "string",
+          "enum": [
+            "adapter-info",
+            "capabilities",
+            "conformance-report"
+          ]
+        }
+      }
+    },
+    "exitCode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "meaning"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "meaning": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

@@ -27,11 +27,21 @@ Seeded machine-readable assets already present in this repository:
 
 - [L1 Wire Compatible profile](profiles/l1-wire-compatible/l1-wire-compatible.profile.v1.json)
 - [L2 Protocol Conformant profile](profiles/l2-protocol-conformant/l2-protocol-conformant.profile.v1.json)
+- [L3 Fusion Certified profile](profiles/l3-fusion-certified/l3-fusion-certified.profile.v1.json)
+- [L4 Security Validated profile](profiles/l4-security-validated/l4-security-validated.profile.v1.json)
+- [L5 Full Ecosystem profile](profiles/l5-full-ecosystem/l5-full-ecosystem.profile.v1.json)
 - [L1 CRC reference vectors](vectors/crc/l1-crc.reference.v1.json)
 - [L1 Base62 reference vectors](vectors/base62/l1-base62.reference.v1.json)
+- [L2 interoperability dataset](datasets/canonical/l2-interoperability.dataset.v1.json)
+- [L3 fusion dataset](datasets/canonical/l3-fusion.dataset.v1.json)
+- [L4 security dataset](datasets/canonical/l4-security.dataset.v1.json)
+- [L5 ecosystem dataset](datasets/exhaustive/l5-full-ecosystem.dataset.v1.json)
+- [Adapter interface contract](adapters/INTERFACE.md)
 - [Profile schema](schemas/profile.schema.json)
 - [Vector-set schema](schemas/vector-set.schema.json)
 - [Report schema](schemas/report.schema.json)
+- [Dataset-manifest schema](schemas/dataset-manifest.schema.json)
+- [Adapter-manifest schema](schemas/adapter-manifest.schema.json)
 
 ## Why This Repository Exists
 
@@ -129,6 +139,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for repository scope, contribution rules,
 - Vectors index: [vectors/README.md](vectors/README.md)
 - Schemas index: [schemas/README.md](schemas/README.md)
 - Datasets index: [datasets/README.md](datasets/README.md)
+- Adapters index: [adapters/README.md](adapters/README.md)
 - Reports index: [reports/README.md](reports/README.md)
 - Runner index: [runners/README.md](runners/README.md)
 

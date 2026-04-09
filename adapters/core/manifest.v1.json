@@ -1,0 +1,93 @@
+{
+  "$schema": "../../schemas/adapter-manifest.schema.json",
+  "kind": "adapter-manifest",
+  "schemaVersion": "1.0.0",
+  "adapterId": "opensynaptic-core",
+  "version": "1.0.0",
+  "title": "OpenSynaptic Core Adapter Manifest",
+  "status": "planned",
+  "implementation": {
+    "name": "OpenSynaptic Core",
+    "repository": "https://github.com/OpenSynaptic/OpenSynaptic",
+    "language": "Python 3.11 + Rust",
+    "target": "reference-server"
+  },
+  "roles": [
+    "producer",
+    "consumer",
+    "fusion",
+    "security",
+    "ecosystem"
+  ],
+  "supportedProfiles": [
+    "opensynaptic.l1-wire-compatible",
+    "opensynaptic.l2-protocol-conformant",
+    "opensynaptic.l3-fusion-certified",
+    "opensynaptic.l4-security-validated",
+    "opensynaptic.l5-full-ecosystem"
+  ],
+  "capabilities": {
+    "encodeModes": [
+      "full",
+      "diff",
+      "heart"
+    ],
+    "decodeModes": [
+      "full",
+      "diff",
+      "heart"
+    ],
+    "security": true,
+    "ucumStandardization": true
+  },
+  "interface": {
+    "protocolVersion": "1.0.0",
+    "transport": "cli-json-v1",
+    "requiredCommands": [
+      {
+        "name": "info",
+        "purpose": "Emit adapter identity and implementation metadata.",
+        "stdoutKind": "adapter-info"
+      },
+      {
+        "name": "capabilities",
+        "purpose": "Emit supported profiles, roles, and packet capabilities.",
+        "stdoutKind": "capabilities"
+      },
+      {
+        "name": "run-profile",
+        "purpose": "Execute an entire conformance profile against OpenSynaptic Core.",
+        "stdoutKind": "conformance-report"
+      },
+      {
+        "name": "run-cases",
+        "purpose": "Execute one or more selected cases from a profile or dataset.",
+        "stdoutKind": "conformance-report"
+      }
+    ],
+    "stdout": {
+      "format": "json",
+      "reportSchemaPath": "../../schemas/report.schema.json",
+      "note": "run-profile and run-cases must emit repository-compatible reports."
+    },
+    "exitCodes": [
+      {
+        "code": 0,
+        "meaning": "Successful execution; report may still contain FAIL status for profile results."
+      },
+      {
+        "code": 1,
+        "meaning": "Validation failure or profile failure with report output available."
+      },
+      {
+        "code": 2,
+        "meaning": "Usage or argument error."
+      },
+      {
+        "code": 3,
+        "meaning": "Adapter execution error or environment fault."
+      }
+    ]
+  },
+  "note": "This manifest freezes the adapter contract before the concrete adapter command is implemented."
+}

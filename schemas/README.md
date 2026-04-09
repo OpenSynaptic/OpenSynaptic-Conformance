@@ -17,3 +17,5 @@ Current schemas:
 - [Profile schema](profile.schema.json)
 - [Vector-set schema](vector-set.schema.json)
 - [Report schema](report.schema.json)
+- [Dataset-manifest schema](dataset-manifest.schema.json)
+- [Adapter-manifest schema](adapter-manifest.schema.json)

@@ -1,0 +1,67 @@
+{
+  "$schema": "../../schemas/profile.schema.json",
+  "kind": "conformance-profile",
+  "schemaVersion": "1.0.0",
+  "profileId": "opensynaptic.l3-fusion-certified",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L3 Fusion Certified",
+  "level": "L3",
+  "status": "draft",
+  "description": "Fusion-strategy, DIFF bitmask, HEART replay, and Core versus FX sequence equivalence checks.",
+  "appliesTo": [
+    "core",
+    "fx",
+    "third-party"
+  ],
+  "prerequisites": [
+    "opensynaptic.l2-protocol-conformant@>=1.0.0"
+  ],
+  "requirements": [
+    {
+      "id": "fusion-canonical-dataset",
+      "type": "dataset",
+      "title": "Fusion canonical dataset",
+      "path": "../../datasets/canonical/l3-fusion.dataset.v1.json",
+      "requiredCases": [
+        "L3-STRAT-01",
+        "L3-STRAT-02",
+        "L3-DIFF-01",
+        "L3-DIFF-02",
+        "L3-HEART-01",
+        "L3-CROSS-01"
+      ]
+    }
+  ],
+  "execution": {
+    "mode": "mixed",
+    "requiredPairs": [
+      {
+        "producer": "fx",
+        "consumer": "core",
+        "cases": [
+          "L3-CROSS-01"
+        ]
+      }
+    ],
+    "note": "Most L3 cases are implementation-local fusion checks. The explicit cross-implementation case verifies FX and Core command sequences remain identical."
+  },
+  "passCriteria": {
+    "policy": "all-required-must-pass",
+    "minimumPassed": 6,
+    "note": "L3 requires all strategy, DIFF, HEART, and cross-sequence checks to pass."
+  },
+  "skipPolicy": {
+    "allowed": false,
+    "note": "Implementations without fusion behavior should not claim L3."
+  },
+  "report": {
+    "schemaPath": "../../schemas/report.schema.json",
+    "requiredSummaryFields": [
+      "total",
+      "passed",
+      "failed",
+      "skipped",
+      "status"
+    ]
+  }
+}

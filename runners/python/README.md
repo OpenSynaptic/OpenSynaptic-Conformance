@@ -6,8 +6,9 @@ Current capabilities:
 
 - list discovered schemas, profiles, and vector sets
 - validate JSON asset parsing and required top-level fields
-- validate file references between profiles, vectors, and schemas
-- verify that profile-required vector case IDs exist in the referenced vector sets
+- validate file references between profiles, vectors, datasets, adapters, and schemas
+- verify that profile-required vector and dataset case IDs exist in the referenced manifests
+- verify that adapter manifests reference known profile ids and valid report schemas
 - emit a machine-readable asset-validation report
 
 Example usage:
