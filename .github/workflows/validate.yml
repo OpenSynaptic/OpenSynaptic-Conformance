@@ -8,10 +8,43 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: OpenSynaptic-Conformance
 
     steps:
-      - name: Checkout repository
+      - name: Checkout conformance repository
         uses: actions/checkout@v4
+        with:
+          path: OpenSynaptic-Conformance
+
+      - name: Checkout OpenSynaptic
+        uses: actions/checkout@v4
+        with:
+          repository: OpenSynaptic/OpenSynaptic
+          path: OpenSynaptic
+          fetch-depth: 1
+
+      - name: Checkout OSynaptic-FX
+        uses: actions/checkout@v4
+        with:
+          repository: OpenSynaptic/OSynaptic-FX
+          path: OSynaptic-FX
+          fetch-depth: 1
+
+      - name: Checkout OSynaptic-RX
+        uses: actions/checkout@v4
+        with:
+          repository: OpenSynaptic/OSynaptic-RX
+          path: OSynaptic-RX
+          fetch-depth: 1
+
+      - name: Checkout OSynaptic-TX
+        uses: actions/checkout@v4
+        with:
+          repository: OpenSynaptic/OSynaptic-TX
+          path: OSynaptic-TX
+          fetch-depth: 1
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,6 +60,9 @@ jobs:
       - name: Verify mock adapter against L3 profile
         run: python runners/python/conformance_runner.py verify-adapter --adapter adapters/mock/manifest.v1.json --profile profiles/l3-fusion-certified/l3-fusion-certified.profile.v1.json --write-report reports/generated/mock-adapter.l3.report.json
 
+      - name: Smoke real implementation adapters
+        run: python runners/python/real_adapter_smoke.py
+
       - name: Run repository CLI tests
         run: python -m unittest discover -s tests/python -p "test_*.py" -v
 
@@ -35,5 +71,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: conformance-reports
-          path: reports/generated/*.json
+          path: OpenSynaptic-Conformance/reports/generated/*.json
           if-no-files-found: warn

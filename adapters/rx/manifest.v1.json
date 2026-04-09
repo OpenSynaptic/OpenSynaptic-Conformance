@@ -5,7 +5,7 @@
   "adapterId": "osynaptic-rx",
   "version": "1.0.0",
   "title": "OSynaptic-RX Adapter Manifest",
-  "status": "planned",
+  "status": "active",
   "implementation": {
     "name": "OSynaptic-RX",
     "repository": "https://github.com/OpenSynaptic/OSynaptic-RX",
@@ -30,6 +30,11 @@
       "RX does not participate in fusion-strategy certification as an encoder.",
       "RX remains eligible for L2 decoding and CRC verification roles."
     ]
+  },
+  "invocation": {
+    "type": "python-script",
+    "path": "rx_adapter.py",
+    "workingDirectory": "../.."
   },
   "interface": {
     "protocolVersion": "1.0.0",

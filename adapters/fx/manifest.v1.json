@@ -5,7 +5,7 @@
   "adapterId": "osynaptic-fx",
   "version": "1.0.0",
   "title": "OSynaptic-FX Adapter Manifest",
-  "status": "planned",
+  "status": "active",
   "implementation": {
     "name": "OSynaptic-FX",
     "repository": "https://github.com/OpenSynaptic/OSynaptic-FX",
@@ -37,6 +37,11 @@
     ],
     "security": true,
     "ucumStandardization": true
+  },
+  "invocation": {
+    "type": "python-script",
+    "path": "fx_adapter.py",
+    "workingDirectory": "../.."
   },
   "interface": {
     "protocolVersion": "1.0.0",

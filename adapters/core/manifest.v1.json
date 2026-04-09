@@ -5,7 +5,7 @@
   "adapterId": "opensynaptic-core",
   "version": "1.0.0",
   "title": "OpenSynaptic Core Adapter Manifest",
-  "status": "planned",
+  "status": "active",
   "implementation": {
     "name": "OpenSynaptic Core",
     "repository": "https://github.com/OpenSynaptic/OpenSynaptic",
@@ -39,6 +39,11 @@
     ],
     "security": true,
     "ucumStandardization": true
+  },
+  "invocation": {
+    "type": "python-script",
+    "path": "core_adapter.py",
+    "workingDirectory": "../.."
   },
   "interface": {
     "protocolVersion": "1.0.0",
@@ -91,5 +96,5 @@
       }
     ]
   },
-  "note": "This manifest freezes the adapter contract before the concrete adapter command is implemented."
+  "note": "This manifest targets the repository-backed Core adapter command implemented in adapters/core/core_adapter.py."
 }

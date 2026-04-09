@@ -26,5 +26,6 @@ htmlcov/
 # Generated repository artifacts
 reports/generated/
 datasets/generated/
+adapters/.build/
 *.log
 *.tmp

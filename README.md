@@ -14,9 +14,15 @@ It does not host the production implementation source code for OpenSynaptic Core
 
 ## Status
 
-Foundation phase.
+Adapter integration phase.
 
-The repository now has stable machine-readable profiles, datasets, schemas, adapter manifests, an executable mock adapter, and CI-ready runner entry points. The next stage is wiring production adapters from the implementation repositories onto this frozen contract surface.
+The repository now has stable machine-readable profiles, datasets, schemas, adapter manifests, an executable mock adapter, CI-ready runner entry points, and active repository-backed adapters for OpenSynaptic Core, OSynaptic-FX, OSynaptic-RX, and OSynaptic-TX.
+
+Current validation posture:
+
+- mock adapter runs remain the strict PASS baseline for repository-owned contract coverage
+- real adapters are wired into smoke validation against representative profiles
+- real-adapter smoke treats contract/runtime `ERROR` as regressions while preserving honest `FAIL` and `SKIP` results for current implementation gaps
 
 Seeded documents already present in this repository:
 
@@ -148,6 +154,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for repository scope, contribution rules,
 - Reports index: [reports/README.md](reports/README.md)
 - Runner index: [runners/README.md](runners/README.md)
 - Tests index: [tests/README.md](tests/README.md)
+
+## Current Real-Adapter Snapshot
+
+- OpenSynaptic Core adapter is active, passes L1 end-to-end, and now reduces L4 security failures to the remaining timestamp replay API gap.
+- OSynaptic-FX, OSynaptic-RX, and OSynaptic-TX adapters are active and smoke-stable: they emit valid reports without adapter execution errors, while remaining FAIL cases reflect current runtime incompatibilities rather than harness faults.
 
 ## Related Repositories
 

@@ -20,6 +20,7 @@ python runners/python/conformance_runner.py validate-assets
 python runners/python/conformance_runner.py validate-assets --write-report reports/generated/assets-validation.report.json
 python runners/python/conformance_runner.py verify-adapter --adapter adapters/mock/manifest.v1.json --profile profiles/l1-wire-compatible/l1-wire-compatible.profile.v1.json
 python runners/python/conformance_runner.py verify-adapter --adapter adapters/mock/manifest.v1.json --profile profiles/l3-fusion-certified/l3-fusion-certified.profile.v1.json --case L3-CROSS-01
+python runners/python/real_adapter_smoke.py
 ```
 
-This runner is now the repository-local execution entry point for both asset validation and adapter contract verification. The included mock adapter gives CI and future implementation adapters a stable target to conform against.
+This runner is now the repository-local execution entry point for both asset validation and adapter contract verification. The included mock adapter gives CI a strict PASS baseline, while `real_adapter_smoke.py` exercises the active real adapters and fails only on contract/runtime `ERROR` conditions.

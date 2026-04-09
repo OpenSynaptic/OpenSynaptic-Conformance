@@ -5,7 +5,7 @@
   "adapterId": "osynaptic-tx",
   "version": "1.0.0",
   "title": "OSynaptic-TX Adapter Manifest",
-  "status": "planned",
+  "status": "active",
   "implementation": {
     "name": "OSynaptic-TX",
     "repository": "https://github.com/OpenSynaptic/OSynaptic-TX",
@@ -30,6 +30,11 @@
       "TX remains a producer-side participant for L1 and L2.",
       "Fusion and security profiles are not applicable to TX-only deployments."
     ]
+  },
+  "invocation": {
+    "type": "python-script",
+    "path": "tx_adapter.py",
+    "workingDirectory": "../.."
   },
   "interface": {
     "protocolVersion": "1.0.0",
