@@ -18,3 +18,6 @@ Current adapter contract assets:
 - [OSynaptic-FX manifest](fx/manifest.v1.json)
 - [OSynaptic-RX manifest](rx/manifest.v1.json)
 - [OSynaptic-TX manifest](tx/manifest.v1.json)
+- [Mock adapter manifest](mock/manifest.v1.json)
+
+The mock adapter is the repository-owned executable reference for the CLI contract. It is intentionally synthetic: its job is to prove that runner logic, schemas, and CI wiring stay coherent even before production adapters land in the implementation repositories.

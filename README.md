@@ -14,9 +14,9 @@ It does not host the production implementation source code for OpenSynaptic Core
 
 ## Status
 
-Bootstrap phase.
+Foundation phase.
 
-The initial repository goal is to establish a stable structure for documentation, vectors, datasets, schemas, runners, and reports so that future protocol verification work is versioned independently from implementation repositories.
+The repository now has stable machine-readable profiles, datasets, schemas, adapter manifests, an executable mock adapter, and CI-ready runner entry points. The next stage is wiring production adapters from the implementation repositories onto this frozen contract surface.
 
 Seeded documents already present in this repository:
 
@@ -37,11 +37,14 @@ Seeded machine-readable assets already present in this repository:
 - [L4 security dataset](datasets/canonical/l4-security.dataset.v1.json)
 - [L5 ecosystem dataset](datasets/exhaustive/l5-full-ecosystem.dataset.v1.json)
 - [Adapter interface contract](adapters/INTERFACE.md)
+- [Mock adapter manifest](adapters/mock/manifest.v1.json)
 - [Profile schema](schemas/profile.schema.json)
 - [Vector-set schema](schemas/vector-set.schema.json)
 - [Report schema](schemas/report.schema.json)
 - [Dataset-manifest schema](schemas/dataset-manifest.schema.json)
 - [Adapter-manifest schema](schemas/adapter-manifest.schema.json)
+- [Adapter-info schema](schemas/adapter-info.schema.json)
+- [Adapter-capabilities schema](schemas/adapter-capabilities.schema.json)
 
 ## Why This Repository Exists
 
@@ -87,6 +90,7 @@ This repository should not become:
 | `runners/` | Shared execution entry points for verification workflows |
 | `adapters/` | Per-implementation integration layers |
 | `reports/` | Baseline conformance reports and compatibility summaries |
+| `tests/` | Repository-local verification for runners, schemas, and adapters |
 
 ## Relationship To Certification
 
@@ -105,6 +109,7 @@ This keeps policy and branding separate from the reproducible technical evidence
 3. Add CRC, Base62, FULL, DIFF, HEART, and control-command golden vectors.
 4. Define report schemas for official baseline output.
 5. Ship a reference runner that can verify OpenSynaptic Core, FX, RX, and TX against the same assets.
+6. Freeze an executable adapter contract with repository-owned smoke coverage and CI enforcement.
 
 ## Data And Reproducibility Policy
 
@@ -142,6 +147,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for repository scope, contribution rules,
 - Adapters index: [adapters/README.md](adapters/README.md)
 - Reports index: [reports/README.md](reports/README.md)
 - Runner index: [runners/README.md](runners/README.md)
+- Tests index: [tests/README.md](tests/README.md)
 
 ## Related Repositories
 

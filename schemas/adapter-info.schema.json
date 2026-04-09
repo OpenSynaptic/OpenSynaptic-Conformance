@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OpenSynaptic/OpenSynaptic-Conformance/blob/main/schemas/adapter-info.schema.json",
+  "title": "OpenSynaptic Adapter Info",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "schemaVersion",
+    "adapterId",
+    "implementation",
+    "protocolVersion",
+    "transport"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "kind": {
+      "const": "adapter-info"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "adapterId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "implementation": {
+      "$ref": "#/$defs/implementation"
+    },
+    "protocolVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "transport": {
+      "type": "string",
+      "const": "cli-json-v1"
+    },
+    "note": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "target"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

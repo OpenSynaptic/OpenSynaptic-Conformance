@@ -58,6 +58,8 @@
     ],
     "stdout": {
       "format": "json",
+      "infoSchemaPath": "../../schemas/adapter-info.schema.json",
+      "capabilitiesSchemaPath": "../../schemas/adapter-capabilities.schema.json",
       "reportSchemaPath": "../../schemas/report.schema.json",
       "note": "The adapter may wrap host-side CMake tests or a minimal CLI wrapper around packet assembly routines."
     },

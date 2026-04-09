@@ -2,15 +2,15 @@
   "$schema": "../../schemas/adapter-manifest.schema.json",
   "kind": "adapter-manifest",
   "schemaVersion": "1.0.0",
-  "adapterId": "opensynaptic-core",
+  "adapterId": "opensynaptic-mock",
   "version": "1.0.0",
-  "title": "OpenSynaptic Core Adapter Manifest",
-  "status": "planned",
+  "title": "OpenSynaptic Mock Adapter Manifest",
+  "status": "active",
   "implementation": {
-    "name": "OpenSynaptic Core",
-    "repository": "https://github.com/OpenSynaptic/OpenSynaptic",
-    "language": "Python 3.11 + Rust",
-    "target": "reference-server"
+    "name": "OpenSynaptic Mock Adapter",
+    "repository": "https://github.com/OpenSynaptic/OpenSynaptic-Conformance",
+    "language": "Python 3",
+    "target": "contract-example"
   },
   "roles": [
     "producer",
@@ -27,6 +27,7 @@
     "opensynaptic.l5-full-ecosystem"
   ],
   "capabilities": {
+    "purpose": "Reference contract adapter used by CI and local runner validation.",
     "encodeModes": [
       "full",
       "diff",
@@ -39,6 +40,11 @@
     ],
     "security": true,
     "ucumStandardization": true
+  },
+  "invocation": {
+    "type": "python-script",
+    "path": "mock_adapter.py",
+    "workingDirectory": "../.."
   },
   "interface": {
     "protocolVersion": "1.0.0",
@@ -56,12 +62,12 @@
       },
       {
         "name": "run-profile",
-        "purpose": "Execute an entire conformance profile against OpenSynaptic Core.",
+        "purpose": "Execute an entire conformance profile using deterministic synthetic results.",
         "stdoutKind": "conformance-report"
       },
       {
         "name": "run-cases",
-        "purpose": "Execute one or more selected cases from a profile or dataset.",
+        "purpose": "Execute one or more selected cases from a profile or dataset using deterministic synthetic results.",
         "stdoutKind": "conformance-report"
       }
     ],
@@ -70,16 +76,16 @@
       "infoSchemaPath": "../../schemas/adapter-info.schema.json",
       "capabilitiesSchemaPath": "../../schemas/adapter-capabilities.schema.json",
       "reportSchemaPath": "../../schemas/report.schema.json",
-      "note": "run-profile and run-cases must emit repository-compatible reports."
+      "note": "This adapter is a repository-local contract example and CI smoke target."
     },
     "exitCodes": [
       {
         "code": 0,
-        "meaning": "Successful execution; report may still contain FAIL status for profile results."
+        "meaning": "Successful execution."
       },
       {
         "code": 1,
-        "meaning": "Validation failure or profile failure with report output available."
+        "meaning": "Profile failure with report output available."
       },
       {
         "code": 2,
@@ -91,5 +97,5 @@
       }
     ]
   },
-  "note": "This manifest freezes the adapter contract before the concrete adapter command is implemented."
+  "note": "This manifest provides a stable executable target for runner development, CI smoke tests, and third-party adapter authors." 
 }

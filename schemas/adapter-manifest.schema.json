@@ -78,6 +78,9 @@
       "type": "object",
       "additionalProperties": true
     },
+    "invocation": {
+      "$ref": "#/$defs/invocation"
+    },
     "interface": {
       "$ref": "#/$defs/interface"
     },
@@ -145,12 +148,22 @@
           "additionalProperties": false,
           "required": [
             "format",
+            "infoSchemaPath",
+            "capabilitiesSchemaPath",
             "reportSchemaPath"
           ],
           "properties": {
             "format": {
               "type": "string",
               "const": "json"
+            },
+            "infoSchemaPath": {
+              "type": "string",
+              "minLength": 1
+            },
+            "capabilitiesSchemaPath": {
+              "type": "string",
+              "minLength": 1
             },
             "reportSchemaPath": {
               "type": "string",
@@ -172,6 +185,74 @@
           "type": "string"
         }
       }
+    },
+    "invocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "python-script",
+            "command"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "workingDirectory": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "python-script"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "path"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "command"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "command"
+            ]
+          }
+        }
+      ]
     },
     "command": {
       "type": "object",

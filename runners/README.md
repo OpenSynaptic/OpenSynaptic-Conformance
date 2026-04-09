@@ -15,4 +15,4 @@ Current runner entry point:
 - [Python runner README](python/README.md)
 - [Python conformance runner](python/conformance_runner.py)
 
-The first reference runner is implemented in Python to keep asset validation cross-platform and repository-local.
+The first reference runner is implemented in Python to keep asset validation cross-platform and repository-local. It now covers both static asset validation and adapter-contract execution against the repository-owned mock adapter.

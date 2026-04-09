@@ -49,9 +49,20 @@ Additional options are allowed as long as these commands remain stable.
 
 ## Output Contract
 
-- `info` returns a JSON object describing the adapter.
-- `capabilities` returns a JSON object describing supported roles and limits.
+- `info` returns a JSON object compatible with [adapter-info.schema.json](../schemas/adapter-info.schema.json).
+- `capabilities` returns a JSON object compatible with [adapter-capabilities.schema.json](../schemas/adapter-capabilities.schema.json).
 - `run-profile` and `run-cases` return JSON compatible with [report.schema.json](../schemas/report.schema.json).
+
+## Executable Manifests
+
+Planned adapters may exist only as manifests.
+
+Once an adapter becomes executable, its manifest should include an `invocation` block that tells shared runners how to launch it. The first supported invocation styles are:
+
+- `python-script`: repository-local or adapter-local Python entry points launched with the current Python interpreter
+- `command`: external binaries or wrapper commands with fixed argv
+
+This lets the repository keep one generic runner while still supporting different implementation repositories.
 
 ## Exit Codes
 
@@ -89,3 +100,5 @@ When an adapter executes `run-profile` or `run-cases`, the output must identify:
 ## Status Model
 
 Adapter manifests in this repository may be marked `planned` before a concrete implementation exists. That still has value because it freezes the interface contract and supported profile surface.
+
+Executable examples may be marked `active` when they are runnable from this repository. The repository-local mock adapter exists for exactly this purpose: it gives CI and adapter authors a deterministic contract target before Core, FX, RX, and TX publish their own production adapters.

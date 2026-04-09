@@ -1,0 +1,39 @@
+name: Validate Conformance Repository
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Validate repository assets
+        run: python runners/python/conformance_runner.py validate-assets --write-report reports/generated/assets-validation.report.json
+
+      - name: Verify mock adapter against L1 profile
+        run: python runners/python/conformance_runner.py verify-adapter --adapter adapters/mock/manifest.v1.json --profile profiles/l1-wire-compatible/l1-wire-compatible.profile.v1.json --write-report reports/generated/mock-adapter.l1.report.json
+
+      - name: Verify mock adapter against L3 profile
+        run: python runners/python/conformance_runner.py verify-adapter --adapter adapters/mock/manifest.v1.json --profile profiles/l3-fusion-certified/l3-fusion-certified.profile.v1.json --write-report reports/generated/mock-adapter.l3.report.json
+
+      - name: Run repository CLI tests
+        run: python -m unittest discover -s tests/python -p "test_*.py" -v
+
+      - name: Upload generated reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-reports
+          path: reports/generated/*.json
+          if-no-files-found: warn

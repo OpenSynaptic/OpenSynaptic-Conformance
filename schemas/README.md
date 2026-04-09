@@ -19,3 +19,5 @@ Current schemas:
 - [Report schema](report.schema.json)
 - [Dataset-manifest schema](dataset-manifest.schema.json)
 - [Adapter-manifest schema](adapter-manifest.schema.json)
+- [Adapter-info schema](adapter-info.schema.json)
+- [Adapter-capabilities schema](adapter-capabilities.schema.json)

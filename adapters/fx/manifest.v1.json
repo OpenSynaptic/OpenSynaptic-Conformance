@@ -65,6 +65,8 @@
     ],
     "stdout": {
       "format": "json",
+      "infoSchemaPath": "../../schemas/adapter-info.schema.json",
+      "capabilitiesSchemaPath": "../../schemas/adapter-capabilities.schema.json",
       "reportSchemaPath": "../../schemas/report.schema.json",
       "note": "The concrete adapter may wrap CMake or Arduino-oriented test harnesses but must preserve JSON stdout."
     },

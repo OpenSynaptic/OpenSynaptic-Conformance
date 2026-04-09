@@ -11,3 +11,5 @@ Each baseline report should reference:
 - execution timestamp
 
 Generated local output belongs under `reports/generated/` instead of this directory.
+
+Mock adapter smoke reports are useful during development, but they should be promoted here only when the project intentionally wants to freeze a contract baseline for a tagged repository release.
