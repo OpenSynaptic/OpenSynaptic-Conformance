@@ -1,0 +1,103 @@
+{
+  "$schema": "../../schemas/profile.schema.json",
+  "kind": "conformance-profile",
+  "schemaVersion": "1.0.0",
+  "profileId": "opensynaptic.l1-wire-compatible",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L1 Wire Compatible",
+  "level": "L1",
+  "status": "draft",
+  "description": "Bit-level compatibility for CRC, Base62, frame layout, and guard behavior.",
+  "appliesTo": [
+    "core",
+    "fx",
+    "rx",
+    "tx",
+    "third-party"
+  ],
+  "prerequisites": [],
+  "requirements": [
+    {
+      "id": "crc-reference",
+      "type": "vector-set",
+      "title": "CRC reference vectors",
+      "path": "../../vectors/crc/l1-crc.reference.v1.json",
+      "requiredCases": [
+        "L1-CRC8-01",
+        "L1-CRC8-02",
+        "L1-CRC8-03",
+        "L1-CRC16-01",
+        "L1-CRC16-02",
+        "L1-CRC16-03",
+        "L1-CRC16-04"
+      ]
+    },
+    {
+      "id": "base62-reference",
+      "type": "vector-set",
+      "title": "Base62 reference vectors",
+      "path": "../../vectors/base62/l1-base62.reference.v1.json",
+      "requiredCases": [
+        "L1-B62-01",
+        "L1-B62-02",
+        "L1-B62-03",
+        "L1-B62-04",
+        "L1-B62-05",
+        "L1-B62-06",
+        "L1-B62-07",
+        "L1-B62-08",
+        "L1-B62-09",
+        "L1-B62-10",
+        "L1-B62-11",
+        "L1-B62-12",
+        "L1-B62-13",
+        "L1-B62-14",
+        "L1-B62-15",
+        "L1-B62-16",
+        "L1-B62-17",
+        "L1-B62D-01",
+        "L1-B62D-02",
+        "L1-B62D-03",
+        "L1-B62D-04",
+        "L1-B62D-05",
+        "L1-B62D-06"
+      ]
+    },
+    {
+      "id": "frame-layout",
+      "type": "vector-set",
+      "title": "Frame layout and guard vectors",
+      "path": "../../vectors/frame/l1-frame.reference.v1.json",
+      "requiredCases": [
+        "L1-FRAME-01",
+        "L1-FRAME-02",
+        "L1-FRAME-03",
+        "L1-FRAME-04"
+      ],
+      "note": "These vectors cover the canonical standard frame, minimum frame, and decode guard behavior."
+    }
+  ],
+  "execution": {
+    "mode": "single-implementation",
+    "note": "All required cases apply to any implementation claiming L1 wire compatibility."
+  },
+  "passCriteria": {
+    "policy": "all-required-must-pass",
+    "minimumPassed": 34,
+    "note": "L1 is zero-tolerance. Any failed required case is a profile failure."
+  },
+  "skipPolicy": {
+    "allowed": false,
+    "note": "Known design limits should be excluded from the profile version rather than skipped at execution time."
+  },
+  "report": {
+    "schemaPath": "../../schemas/report.schema.json",
+    "requiredSummaryFields": [
+      "total",
+      "passed",
+      "failed",
+      "skipped",
+      "status"
+    ]
+  }
+}

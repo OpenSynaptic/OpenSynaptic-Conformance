@@ -1,0 +1,107 @@
+{
+  "$schema": "../../schemas/vector-set.schema.json",
+  "kind": "vector-set",
+  "schemaVersion": "1.0.0",
+  "vectorSetId": "opensynaptic.l1.frame.reference",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L1 Frame Reference Vectors",
+  "description": "Canonical byte-level frame vectors for L1 wire compatibility.",
+  "category": "frame",
+  "metadata": {
+    "source": "docs/certification/OpenSynaptic_Certification_Process.md",
+    "notes": [
+      "The standard FULL frame vector uses body text T1|A01|TVK and the exact CRC values computed from the OpenSynaptic wire algorithms.",
+      "Guard vectors model malformed input for implementations that expose decode-side validation behavior."
+    ]
+  },
+  "vectors": [
+    {
+      "id": "L1-FRAME-01",
+      "operation": "frame_layout",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx",
+        "tx"
+      ],
+      "input": {
+        "packetHex": "3F01010203040700000000123454317C4130317C54564B090416",
+        "length": 26
+      },
+      "expected": {
+        "ok": true,
+        "cmdHex": "0x3F",
+        "route": 1,
+        "aidHex": "0x01020304",
+        "tid": 7,
+        "timestampHex": "0x000000001234",
+        "bodyText": "T1|A01|TVK",
+        "bodyHex": "54317C4130317C54564B",
+        "bodyLength": 10,
+        "crc8Hex": "0x09",
+        "crc16Hex": "0x0416"
+      }
+    },
+    {
+      "id": "L1-FRAME-02",
+      "operation": "frame_layout",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx",
+        "tx"
+      ],
+      "input": {
+        "packetHex": "3F0101020304070000000012340081F0",
+        "length": 16
+      },
+      "expected": {
+        "ok": true,
+        "cmdHex": "0x3F",
+        "route": 1,
+        "aidHex": "0x01020304",
+        "tid": 7,
+        "timestampHex": "0x000000001234",
+        "bodyText": "",
+        "bodyHex": "",
+        "bodyLength": 0,
+        "crc8Hex": "0x00",
+        "crc16Hex": "0x81F0"
+      }
+    },
+    {
+      "id": "L1-FRAME-03",
+      "operation": "guard_parse",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx"
+      ],
+      "input": {
+        "packetHex": "3F0101020304070000000012340081",
+        "length": 15
+      },
+      "expected": {
+        "ok": false,
+        "error": "frame-too-short"
+      }
+    },
+    {
+      "id": "L1-FRAME-04",
+      "operation": "guard_parse",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx"
+      ],
+      "input": {
+        "packetHex": null,
+        "length": 0
+      },
+      "expected": {
+        "ok": false,
+        "error": "null-input"
+      }
+    }
+  ]
+}

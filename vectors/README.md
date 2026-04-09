@@ -11,3 +11,10 @@ Typical vector groups include:
 - control command payload and byte-order cases
 
 Vectors should stay compact, deterministic, and easy to inspect.
+
+Current vector sets:
+
+- [L1 CRC reference vectors](crc/l1-crc.reference.v1.json)
+- [L1 Base62 reference vectors](base62/l1-base62.reference.v1.json)
+- [L1 frame reference vectors](frame/l1-frame.reference.v1.json)
+- [Protocol command reference](commands/protocol-commands.reference.v1.json)

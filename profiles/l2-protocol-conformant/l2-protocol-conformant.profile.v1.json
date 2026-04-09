@@ -1,0 +1,126 @@
+{
+  "$schema": "../../schemas/profile.schema.json",
+  "kind": "conformance-profile",
+  "schemaVersion": "1.0.0",
+  "profileId": "opensynaptic.l2-protocol-conformant",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L2 Protocol Conformant",
+  "level": "L2",
+  "status": "draft",
+  "description": "Cross-implementation packet exchange, field agreement, and CRC cross-checks on top of L1 wire compatibility.",
+  "appliesTo": [
+    "core",
+    "fx",
+    "rx",
+    "tx",
+    "third-party"
+  ],
+  "prerequisites": [
+    "opensynaptic.l1-wire-compatible@>=1.0.0"
+  ],
+  "requirements": [
+    {
+      "id": "cross-implementation-exchange",
+      "type": "procedure",
+      "title": "Cross-implementation frame exchange",
+      "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
+      "requiredCases": [
+        "L2-XENC-01",
+        "L2-XENC-02",
+        "L2-XENC-03",
+        "L2-XENC-04",
+        "L2-XENC-05",
+        "L2-XENC-06"
+      ]
+    },
+    {
+      "id": "multi-sensor-exchange",
+      "type": "procedure",
+      "title": "Multi-sensor frame exchange",
+      "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "requiredCases": [
+        "L2-MULTI-01"
+      ]
+    },
+    {
+      "id": "crc-cross-check",
+      "type": "procedure",
+      "title": "CRC cross verification across implementations",
+      "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
+      "requiredCases": [
+        "L2-CRC-CROSS-01"
+      ]
+    }
+  ],
+  "execution": {
+    "mode": "cross-implementation",
+    "requiredPairs": [
+      {
+        "producer": "tx",
+        "consumer": "core",
+        "cases": [
+          "L2-XENC-01"
+        ]
+      },
+      {
+        "producer": "tx",
+        "consumer": "rx",
+        "cases": [
+          "L2-XENC-02"
+        ]
+      },
+      {
+        "producer": "fx",
+        "consumer": "core",
+        "cases": [
+          "L2-XENC-03"
+        ]
+      },
+      {
+        "producer": "fx",
+        "consumer": "rx",
+        "cases": [
+          "L2-XENC-04"
+        ]
+      },
+      {
+        "producer": "core",
+        "consumer": "fx",
+        "cases": [
+          "L2-XENC-05"
+        ]
+      },
+      {
+        "producer": "core",
+        "consumer": "rx",
+        "cases": [
+          "L2-XENC-06"
+        ]
+      }
+    ],
+    "note": "When evaluating a single implementation, required cases are filtered to the procedures and producer-consumer pairs in which that implementation participates."
+  },
+  "passCriteria": {
+    "policy": "all-required-must-pass",
+    "minimumPassed": 8,
+    "note": "The full ecosystem matrix contains 8 required cases. Implementation-scoped reports should compute totals after applicability filtering."
+  },
+  "skipPolicy": {
+    "allowed": false,
+    "note": "If an implementation cannot satisfy a required L2 role, it should not claim L2 conformance."
+  },
+  "report": {
+    "schemaPath": "../../schemas/report.schema.json",
+    "requiredSummaryFields": [
+      "total",
+      "passed",
+      "failed",
+      "skipped",
+      "status"
+    ]
+  }
+}

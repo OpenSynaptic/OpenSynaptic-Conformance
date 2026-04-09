@@ -11,3 +11,9 @@ Planned schema families include:
 - compatibility matrix summaries
 
 Schema changes should be versioned whenever they affect public tooling or stored artifacts.
+
+Current schemas:
+
+- [Profile schema](profile.schema.json)
+- [Vector-set schema](vector-set.schema.json)
+- [Report schema](report.schema.json)

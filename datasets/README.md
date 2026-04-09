@@ -13,3 +13,7 @@ Repository policy:
 - keep small stable datasets in Git
 - keep generation rules in Git for larger datasets
 - avoid committing large transient output unless it is part of a versioned baseline
+
+Current dataset directories:
+
+- [Canonical datasets](canonical/README.md)

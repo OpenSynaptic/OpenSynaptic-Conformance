@@ -10,4 +10,9 @@ They should eventually provide:
 - deterministic report generation
 - CI-friendly exit behavior
 
-The first reference runner can be implemented in Python if it simplifies cross-platform orchestration.
+Current runner entry point:
+
+- [Python runner README](python/README.md)
+- [Python conformance runner](python/conformance_runner.py)
+
+The first reference runner is implemented in Python to keep asset validation cross-platform and repository-local.

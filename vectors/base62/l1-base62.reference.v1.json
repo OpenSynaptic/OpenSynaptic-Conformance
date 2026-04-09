@@ -1,0 +1,372 @@
+{
+  "$schema": "../../schemas/vector-set.schema.json",
+  "kind": "vector-set",
+  "schemaVersion": "1.0.0",
+  "vectorSetId": "opensynaptic.l1.base62.reference",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L1 Base62 Reference Vectors",
+  "description": "Canonical Base62 vectors for the implementation alphabet used by OpenSynaptic Core, FX, RX, and TX.",
+  "category": "base62",
+  "metadata": {
+    "alphabet": "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "notes": [
+      "These vectors follow the implementation charset used by the current Core, FX, RX, and TX codebases.",
+      "238327 encodes as ZZZ; 238328 is the rollover case and encodes as 1000.",
+      "Some prose-only drafts used inconsistent letter casing. The values here are the machine-readable canonical forms for conformance."
+    ]
+  },
+  "vectors": [
+    {
+      "id": "L1-B62-01",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 0
+      },
+      "expected": {
+        "text": "0"
+      }
+    },
+    {
+      "id": "L1-B62-02",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 1
+      },
+      "expected": {
+        "text": "1"
+      }
+    },
+    {
+      "id": "L1-B62-03",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 9
+      },
+      "expected": {
+        "text": "9"
+      }
+    },
+    {
+      "id": "L1-B62-04",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 10
+      },
+      "expected": {
+        "text": "a"
+      }
+    },
+    {
+      "id": "L1-B62-05",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 35
+      },
+      "expected": {
+        "text": "z"
+      }
+    },
+    {
+      "id": "L1-B62-06",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 36
+      },
+      "expected": {
+        "text": "A"
+      }
+    },
+    {
+      "id": "L1-B62-07",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 61
+      },
+      "expected": {
+        "text": "Z"
+      }
+    },
+    {
+      "id": "L1-B62-08",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 62
+      },
+      "expected": {
+        "text": "10"
+      }
+    },
+    {
+      "id": "L1-B62-09",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 3843
+      },
+      "expected": {
+        "text": "ZZ"
+      }
+    },
+    {
+      "id": "L1-B62-10",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 238328
+      },
+      "expected": {
+        "text": "1000"
+      },
+      "note": "238328 equals 62^3 and therefore rolls over to the next digit width."
+    },
+    {
+      "id": "L1-B62-11",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 215000
+      },
+      "expected": {
+        "text": "TVK"
+      }
+    },
+    {
+      "id": "L1-B62-12",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": -1
+      },
+      "expected": {
+        "text": "-1"
+      }
+    },
+    {
+      "id": "L1-B62-13",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": -62
+      },
+      "expected": {
+        "text": "-10"
+      }
+    },
+    {
+      "id": "L1-B62-14",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": -61
+      },
+      "expected": {
+        "text": "-Z"
+      }
+    },
+    {
+      "id": "L1-B62-15",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": 2147483647
+      },
+      "expected": {
+        "text": "2lkCB1"
+      }
+    },
+    {
+      "id": "L1-B62-16",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": -2147483648
+      },
+      "expected": {
+        "text": "-2lkCB2"
+      }
+    },
+    {
+      "id": "L1-B62-17",
+      "operation": "encode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "tx"
+      ],
+      "input": {
+        "value": -123456789
+      },
+      "expected": {
+        "text": "-8m0Kx"
+      }
+    },
+    {
+      "id": "L1-B62D-01",
+      "operation": "decode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx"
+      ],
+      "input": {
+        "text": "0"
+      },
+      "expected": {
+        "value": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "L1-B62D-02",
+      "operation": "decode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx"
+      ],
+      "input": {
+        "text": "10"
+      },
+      "expected": {
+        "value": 62,
+        "ok": true
+      }
+    },
+    {
+      "id": "L1-B62D-03",
+      "operation": "decode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx"
+      ],
+      "input": {
+        "text": "-1"
+      },
+      "expected": {
+        "value": -1,
+        "ok": true
+      }
+    },
+    {
+      "id": "L1-B62D-04",
+      "operation": "decode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx"
+      ],
+      "input": {
+        "text": "TVK"
+      },
+      "expected": {
+        "value": 215000,
+        "ok": true
+      }
+    },
+    {
+      "id": "L1-B62D-05",
+      "operation": "decode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx"
+      ],
+      "input": {
+        "text": "!bad"
+      },
+      "expected": {
+        "ok": false,
+        "error": "invalid-character"
+      }
+    },
+    {
+      "id": "L1-B62D-06",
+      "operation": "decode",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx"
+      ],
+      "input": {
+        "case": "null"
+      },
+      "expected": {
+        "ok": false,
+        "error": "null-input"
+      }
+    }
+  ]
+}

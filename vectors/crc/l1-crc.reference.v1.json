@@ -1,0 +1,169 @@
+{
+  "$schema": "../../schemas/vector-set.schema.json",
+  "kind": "vector-set",
+  "schemaVersion": "1.0.0",
+  "vectorSetId": "opensynaptic.l1.crc.reference",
+  "version": "1.0.0",
+  "title": "OpenSynaptic L1 CRC Reference Vectors",
+  "description": "Known-answer vectors for CRC-8/SMBUS and CRC-16/CCITT-FALSE used by L1 wire compatibility checks.",
+  "category": "crc",
+  "metadata": {
+    "source": "docs/certification/OpenSynaptic_Certification_Process.md",
+    "notes": [
+      "Empty-input vectors cover the deterministic return value; language-specific runners should also assert null-guard behavior where applicable."
+    ]
+  },
+  "vectors": [
+    {
+      "id": "L1-CRC8-01",
+      "operation": "crc8_smbus",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx",
+        "tx"
+      ],
+      "input": {
+        "case": "ascii",
+        "text": "123456789",
+        "bytesHex": "313233343536373839"
+      },
+      "parameters": {
+        "polyHex": "0x07",
+        "initHex": "0x00"
+      },
+      "expected": {
+        "resultHex": "0xF4"
+      }
+    },
+    {
+      "id": "L1-CRC8-02",
+      "operation": "crc8_smbus",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx",
+        "tx"
+      ],
+      "input": {
+        "case": "hex-bytes",
+        "bytesHex": "01"
+      },
+      "parameters": {
+        "polyHex": "0x07",
+        "initHex": "0x00"
+      },
+      "expected": {
+        "resultHex": "0x07"
+      }
+    },
+    {
+      "id": "L1-CRC8-03",
+      "operation": "crc8_smbus",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx",
+        "tx"
+      ],
+      "input": {
+        "case": "empty",
+        "bytesHex": ""
+      },
+      "parameters": {
+        "polyHex": "0x07",
+        "initHex": "0x00"
+      },
+      "expected": {
+        "resultHex": "0x00",
+        "guard": "must-not-crash"
+      }
+    },
+    {
+      "id": "L1-CRC16-01",
+      "operation": "crc16_ccitt_false",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx",
+        "tx"
+      ],
+      "input": {
+        "case": "ascii",
+        "text": "123456789",
+        "bytesHex": "313233343536373839"
+      },
+      "parameters": {
+        "polyHex": "0x1021",
+        "initHex": "0xFFFF"
+      },
+      "expected": {
+        "resultHex": "0x29B1"
+      }
+    },
+    {
+      "id": "L1-CRC16-02",
+      "operation": "crc16_ccitt_false",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx",
+        "tx"
+      ],
+      "input": {
+        "case": "hex-bytes",
+        "bytesHex": "00"
+      },
+      "parameters": {
+        "polyHex": "0x1021",
+        "initHex": "0xFFFF"
+      },
+      "expected": {
+        "resultHex": "0xE1F0"
+      }
+    },
+    {
+      "id": "L1-CRC16-03",
+      "operation": "crc16_ccitt_false",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx",
+        "tx"
+      ],
+      "input": {
+        "case": "hex-bytes",
+        "bytesHex": "FF"
+      },
+      "parameters": {
+        "polyHex": "0x1021",
+        "initHex": "0xFFFF"
+      },
+      "expected": {
+        "resultHex": "0xFF00"
+      }
+    },
+    {
+      "id": "L1-CRC16-04",
+      "operation": "crc16_ccitt_false",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx",
+        "tx"
+      ],
+      "input": {
+        "case": "empty",
+        "bytesHex": ""
+      },
+      "parameters": {
+        "polyHex": "0x1021",
+        "initHex": "0xFFFF"
+      },
+      "expected": {
+        "resultHex": "0xFFFF",
+        "guard": "must-not-crash"
+      }
+    }
+  ]
+}

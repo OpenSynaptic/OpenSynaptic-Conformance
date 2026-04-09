@@ -223,14 +223,14 @@ assert crc16_ccitt(b"123456789") == 0x29B1
 | L1-B62-07 | 61 | `"Z"` | Core, FX, TX |
 | L1-B62-08 | 62 | `"10"` | Core, FX, TX |
 | L1-B62-09 | 3843 | `"ZZ"` | Core, FX, TX |
-| L1-B62-10 | 238328 | `"ZZZ"` (≈62³-1) | Core, FX, TX |
+| L1-B62-10 | 238328 | `"1000"` (=62³) | Core, FX, TX |
 | L1-B62-11 | 215000 | `"TVK"` | Core, FX, TX, RX(dec) |
 | L1-B62-12 | -1 | `"-1"` | Core, FX, TX |
 | L1-B62-13 | -62 | `"-10"` | Core, FX, TX |
 | L1-B62-14 | -61 | `"-Z"` | Core, FX, TX |
 | L1-B62-15 | 2147483647 | `"2lkCB1"` | Core, FX, TX |
-| L1-B62-16 | -2147483648 | (负值编码) | Core, FX, TX |
-| L1-B62-17 | -123456789 | `"-8M0kX"` | Core, FX |
+| L1-B62-16 | -2147483648 | `"-2lkCB2"` | Core, FX, TX |
+| L1-B62-17 | -123456789 | `"-8m0Kx"` | Core, FX, TX |
 
 ### 3.4 Base62 解码参考向量测试
 
@@ -254,10 +254,10 @@ route    = 0x01
 aid      = 0x01020304
 tid      = 0x07
 ts_sec   = 0x00001234  (48-bit: 0x000000001234)
-body     = "T1|A01|TVK" (11 bytes)
+body     = "T1|A01|TVK" (10 bytes)
 ```
 
-**期望帧（25 字节）**：
+**期望帧（26 字节）**：
 ```
 字节    值 (hex)              说明
 [0]     3F                    cmd
@@ -273,16 +273,16 @@ body     = "T1|A01|TVK" (11 bytes)
 [10]    00                    ts byte 2
 [11]    12                    ts byte 1
 [12]    34                    ts byte 0 (LSB)
-[13-23] body (11 bytes)       "T1|A01|TVK"
-[24]    XX                    CRC-8 (body)
-[25]    YY                    CRC-16 high byte
-[26]    ZZ                    CRC-16 low byte
+[13-22] body (10 bytes)       "T1|A01|TVK"
+[23]    XX                    CRC-8 (body)
+[24]    YY                    CRC-16 high byte
+[25]    ZZ                    CRC-16 low byte
 ```
 
 **验证指令**：
 ```c
 // 帧总长
-ASSERT(frame_len == 13 + 11 + 3);  // == 27
+ASSERT(frame_len == 13 + 10 + 3);  // == 26
 
 // 字节序验证
 ASSERT(frame[0]  == 0x3F);          // cmd
@@ -300,13 +300,13 @@ ASSERT(frame[12] == 0x34);          // ts[0] LSB
 ASSERT(memcmp(frame + 13, "T1|A01|TVK", 10) == 0);
 
 // CRC-8 验证（仅 body 计算）
-uint8_t crc8_body = crc8(frame + 13, 11, 0x07, 0x00);
-ASSERT(frame[24] == crc8_body);
+uint8_t crc8_body = crc8(frame + 13, 10, 0x07, 0x00);
+ASSERT(frame[23] == crc8_body);
 
-// CRC-16 验证（全帧 [0..24] 计算）
-uint16_t crc16_all = crc16(frame, 25, 0x1021, 0xFFFF);
-ASSERT(frame[25] == (crc16_all >> 8));      // high byte
-ASSERT(frame[26] == (crc16_all & 0xFF));    // low byte
+// CRC-16 验证（全帧 [0..23] 计算）
+uint16_t crc16_all = crc16(frame, 24, 0x1021, 0xFFFF);
+ASSERT(frame[24] == (crc16_all >> 8));      // high byte
+ASSERT(frame[25] == (crc16_all & 0xFF));    // low byte
 ```
 
 #### 测试 L1-FRAME-02：最小帧（空 body）
@@ -1064,7 +1064,7 @@ jobs:
     L1-B62-01   0 → "0"                 [PASS/FAIL]
     L1-B62-02   1 → "1"                 [PASS/FAIL]
     ...
-    L1-B62-17   -123456789 → "-8M0kX"   [PASS/FAIL/N/A]
+    L1-B62-17   -123456789 → "-8m0Kx"   [PASS/FAIL/N/A]
 
   Base62 解码参考向量
     L1-B62D-01  "0" → 0                 [PASS/FAIL]

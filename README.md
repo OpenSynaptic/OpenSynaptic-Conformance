@@ -23,6 +23,16 @@ Seeded documents already present in this repository:
 - [OpenSynaptic Technical Whitepaper](docs/whitepaper/OpenSynaptic_Technical_Whitepaper.md)
 - [OpenSynaptic Certification Process](docs/certification/OpenSynaptic_Certification_Process.md)
 
+Seeded machine-readable assets already present in this repository:
+
+- [L1 Wire Compatible profile](profiles/l1-wire-compatible/l1-wire-compatible.profile.v1.json)
+- [L2 Protocol Conformant profile](profiles/l2-protocol-conformant/l2-protocol-conformant.profile.v1.json)
+- [L1 CRC reference vectors](vectors/crc/l1-crc.reference.v1.json)
+- [L1 Base62 reference vectors](vectors/base62/l1-base62.reference.v1.json)
+- [Profile schema](schemas/profile.schema.json)
+- [Vector-set schema](schemas/vector-set.schema.json)
+- [Report schema](schemas/report.schema.json)
+
 ## Why This Repository Exists
 
 OpenSynaptic already spans multiple implementations and targets:
@@ -112,6 +122,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for repository scope, contribution rules,
 - Whitepaper index: [docs/whitepaper/README.md](docs/whitepaper/README.md)
 - Certification index: [docs/certification/README.md](docs/certification/README.md)
 - Documentation overview: [docs/README.md](docs/README.md)
+
+## Current Machine-Readable Entry Points
+
+- Profiles index: [profiles/README.md](profiles/README.md)
+- Vectors index: [vectors/README.md](vectors/README.md)
+- Schemas index: [schemas/README.md](schemas/README.md)
+- Datasets index: [datasets/README.md](datasets/README.md)
+- Reports index: [reports/README.md](reports/README.md)
+- Runner index: [runners/README.md](runners/README.md)
 
 ## Related Repositories
 

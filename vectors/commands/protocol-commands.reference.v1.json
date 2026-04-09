@@ -1,0 +1,287 @@
+{
+  "$schema": "../../schemas/vector-set.schema.json",
+  "kind": "vector-set",
+  "schemaVersion": "1.0.0",
+  "vectorSetId": "opensynaptic.protocol.commands.reference",
+  "version": "1.0.0",
+  "title": "OpenSynaptic Protocol Command Reference",
+  "description": "Canonical command-byte assignments for data and control commands used by the OpenSynaptic protocol family.",
+  "category": "command",
+  "metadata": {
+    "source": "docs/whitepaper/OpenSynaptic_Technical_Whitepaper.md"
+  },
+  "vectors": [
+    {
+      "id": "CMD-01",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx",
+        "rx",
+        "tx"
+      ],
+      "input": {
+        "symbol": "DATA_FULL"
+      },
+      "expected": {
+        "valueHex": "0x3F",
+        "direction": "data"
+      }
+    },
+    {
+      "id": "CMD-02",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "DATA_FULL_SEC"
+      },
+      "expected": {
+        "valueHex": "0x40",
+        "direction": "data"
+      }
+    },
+    {
+      "id": "CMD-03",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "DATA_DIFF"
+      },
+      "expected": {
+        "valueHex": "0xAA",
+        "direction": "data"
+      }
+    },
+    {
+      "id": "CMD-04",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "DATA_DIFF_SEC"
+      },
+      "expected": {
+        "valueHex": "0xAB",
+        "direction": "data"
+      }
+    },
+    {
+      "id": "CMD-05",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "DATA_HEART"
+      },
+      "expected": {
+        "valueHex": "0x7F",
+        "direction": "data"
+      }
+    },
+    {
+      "id": "CMD-06",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "DATA_HEART_SEC"
+      },
+      "expected": {
+        "valueHex": "0x80",
+        "direction": "data"
+      }
+    },
+    {
+      "id": "CMD-07",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "ID_REQUEST"
+      },
+      "expected": {
+        "valueHex": "0x01",
+        "direction": "control"
+      }
+    },
+    {
+      "id": "CMD-08",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "ID_ASSIGN"
+      },
+      "expected": {
+        "valueHex": "0x02",
+        "direction": "control"
+      }
+    },
+    {
+      "id": "CMD-09",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "ID_POOL_REQ"
+      },
+      "expected": {
+        "valueHex": "0x03",
+        "direction": "control"
+      }
+    },
+    {
+      "id": "CMD-10",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "ID_POOL_RES"
+      },
+      "expected": {
+        "valueHex": "0x04",
+        "direction": "control"
+      }
+    },
+    {
+      "id": "CMD-11",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "HANDSHAKE_ACK"
+      },
+      "expected": {
+        "valueHex": "0x05",
+        "direction": "control"
+      }
+    },
+    {
+      "id": "CMD-12",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "HANDSHAKE_NACK"
+      },
+      "expected": {
+        "valueHex": "0x06",
+        "direction": "control"
+      }
+    },
+    {
+      "id": "CMD-13",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "PING"
+      },
+      "expected": {
+        "valueHex": "0x09",
+        "direction": "control"
+      }
+    },
+    {
+      "id": "CMD-14",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "PONG"
+      },
+      "expected": {
+        "valueHex": "0x0A",
+        "direction": "control"
+      }
+    },
+    {
+      "id": "CMD-15",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "TIME_REQUEST"
+      },
+      "expected": {
+        "valueHex": "0x0B",
+        "direction": "control"
+      }
+    },
+    {
+      "id": "CMD-16",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "TIME_RESPONSE"
+      },
+      "expected": {
+        "valueHex": "0x0C",
+        "direction": "control"
+      }
+    },
+    {
+      "id": "CMD-17",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "SECURE_DICT_READY"
+      },
+      "expected": {
+        "valueHex": "0x0D",
+        "direction": "control"
+      }
+    },
+    {
+      "id": "CMD-18",
+      "operation": "command_byte",
+      "appliesTo": [
+        "core",
+        "fx"
+      ],
+      "input": {
+        "symbol": "SECURE_CHANNEL_ACK"
+      },
+      "expected": {
+        "valueHex": "0x0E",
+        "direction": "control"
+      }
+    }
+  ]
+}

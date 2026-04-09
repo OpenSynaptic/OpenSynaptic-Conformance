@@ -9,3 +9,7 @@ Recommended usage:
 - ensure every published report references a repository version, profile version, and dataset version
 
 Future additions can include compatibility matrices, badge inputs, and release-level summary pages.
+
+Current report directories:
+
+- [Baseline reports](baselines/README.md)
