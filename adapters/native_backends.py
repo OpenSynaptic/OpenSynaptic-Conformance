@@ -234,7 +234,7 @@ class RxSensorField(ctypes.Structure):
     _fields_ = [
         ("sensor_id", ctypes.c_char * 9),
         ("unit", ctypes.c_char * 9),
-        ("scaled", ctypes.c_long),
+        ("scaled", ctypes.c_int32),
     ]
 
 
