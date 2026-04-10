@@ -3,10 +3,10 @@
   "kind": "conformance-profile",
   "schemaVersion": "1.0.0",
   "profileId": "opensynaptic.l5-full-ecosystem",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "OpenSynaptic L5 Full Ecosystem",
   "level": "L5",
-  "status": "draft",
+  "status": "stable",
   "description": "Aggregate ecosystem certification profile for exhaustive business logic, plugin systems, security infrastructure, and orthogonal design coverage.",
   "appliesTo": [
     "core",

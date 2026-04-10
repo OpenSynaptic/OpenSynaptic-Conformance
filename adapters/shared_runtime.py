@@ -366,6 +366,40 @@ def build_capabilities_payload(
     }
 
 
+def build_aggregate_summary(results: list[CaseResult]) -> dict[str, Any] | None:
+    nested_summaries: list[dict[str, int]] = []
+    for item in results:
+        details = item.details or {}
+        values = [details.get(key) for key in ("total", "passed", "failed", "skipped")]
+        if not all(isinstance(value, int) for value in values):
+            return None
+        total, passed, failed, skipped = [int(value) for value in values]
+        nested_summaries.append({
+            "total": total,
+            "passed": passed,
+            "failed": failed,
+            "skipped": skipped,
+        })
+
+    if not nested_summaries:
+        return None
+
+    total = sum(item["total"] for item in nested_summaries)
+    passed = sum(item["passed"] for item in nested_summaries)
+    failed = sum(item["failed"] for item in nested_summaries)
+    skipped = sum(item["skipped"] for item in nested_summaries)
+    pass_rate = 1.0 if total - skipped <= 0 else passed / (total - skipped)
+    return {
+        "total": total,
+        "passed": passed,
+        "failed": failed,
+        "skipped": skipped,
+        "passRate": pass_rate,
+        "suiteCount": len(nested_summaries),
+        "source": "nested-result-details",
+    }
+
+
 def build_report(
     manifest: dict[str, Any],
     profile: dict[str, Any],
@@ -378,10 +412,35 @@ def build_report(
     passed = sum(1 for item in results if item.status == "PASS")
     failed = sum(1 for item in results if item.status in {"FAIL", "ERROR"})
     skipped = sum(1 for item in results if item.status == "SKIP")
+    aggregate_summary = build_aggregate_summary(results)
+    pass_criteria = profile.get("passCriteria", {}) if isinstance(profile.get("passCriteria"), dict) else {}
+    skip_policy = profile.get("skipPolicy", {}) if isinstance(profile.get("skipPolicy"), dict) else {}
+    evaluation_summary = aggregate_summary or {
+        "total": len(results),
+        "passed": passed,
+        "failed": failed,
+        "skipped": skipped,
+        "passRate": 1.0 if len(results) - skipped <= 0 else passed / (len(results) - skipped),
+        "source": "case-results",
+    }
+
     if any(item.status == "ERROR" for item in results):
         status = "ERROR"
     elif failed:
         status = "FAIL"
+    elif pass_criteria.get("policy") == "threshold":
+        threshold_ok = True
+        minimum_passed = pass_criteria.get("minimumPassed")
+        minimum_pass_rate = pass_criteria.get("minimumPassRate")
+        if isinstance(evaluation_summary.get("failed"), int) and int(evaluation_summary["failed"]) > 0:
+            threshold_ok = False
+        if isinstance(minimum_passed, int) and int(evaluation_summary.get("passed", -1)) < minimum_passed:
+            threshold_ok = False
+        if isinstance(minimum_pass_rate, (int, float)) and float(evaluation_summary.get("passRate", 0.0)) < float(minimum_pass_rate):
+            threshold_ok = False
+        if not bool(skip_policy.get("allowed")) and int(evaluation_summary.get("skipped", 0)) > 0:
+            threshold_ok = False
+        status = "PASS" if threshold_ok else "FAIL"
     elif skipped:
         status = "PARTIAL"
     else:
@@ -394,8 +453,13 @@ def build_report(
         "skipped": skipped,
         "status": status,
     }
+    summary_notes: list[str] = []
     if note:
-        summary["note"] = note
+        summary_notes.append(note)
+    if aggregate_summary is not None:
+        summary_notes.append("Threshold evaluation used aggregate nested suite totals.")
+    if summary_notes:
+        summary["note"] = " ".join(summary_notes)
 
     report_environment = {
         "platform": platform.platform(),
@@ -406,7 +470,7 @@ def build_report(
         report_environment.update(environment)
 
     commit = detect_git_commit(implementation_repo)
-    return {
+    report = {
         "$schema": f"{SCHEMA_BASE}/report.schema.json",
         "kind": "conformance-report",
         "schemaVersion": "1.0.0",
@@ -426,6 +490,9 @@ def build_report(
         "summary": summary,
         "results": [item.to_report_entry() for item in results],
     }
+    if aggregate_summary is not None:
+        report["aggregateSummary"] = aggregate_summary
+    return report
 
 
 def exit_code_for_report(report: dict[str, Any]) -> int:

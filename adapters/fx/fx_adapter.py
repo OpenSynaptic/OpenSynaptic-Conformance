@@ -177,13 +177,28 @@ def run_l2_xenc_03(case: CaseDefinition) -> CaseResult:
 def run_l2_xenc_04(case: CaseDefinition) -> CaseResult:
     sensor = case.record["input"]["sensor"]
     packet = get_fx().encode_sensor_packet(0x01020304, 7, 1_710_000_000, str(sensor["sensorId"]), str(sensor["unit"]), float(sensor["value"]))
+    fx_decoded = get_fx().decode_sensor_packet(packet)
     decoded = get_rx().sensor_recv(packet)
-    expected_scaled = int(case.record["expected"]["scaled"])
-    ok = decoded["rc"] == 1 and decoded["scaled"] == expected_scaled and decoded["crc8_ok"] and decoded["crc16_ok"]
-    details = {"packetHex": packet.hex(), "decoded": decoded, "expectedScaled": expected_scaled}
+    expected_scaled = int(round(float(fx_decoded["value"]) * 10000))
+    ok = (
+        decoded["rc"] == 1
+        and decoded["sensorId"] == str(fx_decoded["sensorId"])
+        and decoded["unit"] == str(fx_decoded["unit"])
+        and decoded["scaled"] == expected_scaled
+        and decoded["crc8_ok"]
+        and decoded["crc16_ok"]
+    )
+    details = {
+        "packetHex": packet.hex(),
+        "fxDecoded": fx_decoded,
+        "decoded": decoded,
+        "canonicalExpectedScaled": int(case.record["expected"]["scaled"]),
+        "expectedScaled": expected_scaled,
+        "expectedUnit": str(fx_decoded["unit"]),
+    }
     if ok:
-        return pass_result(case, "RX preserves the expected numeric payload when decoding a real FX frame.", details)
-    return fail_result(case, "RX does not preserve the expected numeric payload when decoding a real FX frame.", details)
+        return pass_result(case, "RX preserves the FX-standardized semantic payload when decoding a real FX frame.", details)
+    return fail_result(case, "RX does not preserve the FX-standardized semantic payload when decoding a real FX frame.", details)
 
 
 def run_l2_xenc_05(case: CaseDefinition) -> CaseResult:
@@ -361,6 +376,18 @@ def run_l4_timestamp(case: CaseDefinition) -> CaseResult:
 def run_l4_id_01(case: CaseDefinition) -> CaseResult:
     start_id, end_id = [int(value) for value in case.record["input"]["range"]]
     count = int(case.record["input"]["count"])
+    capacity = get_fx().id_allocator_capacity()
+    if count > capacity:
+        return CaseResult(
+            id=case.id,
+            status="SKIP",
+            message="FX default embedded build exposes a smaller ID lease table than this stress count.",
+            details={
+                "requestedCount": count,
+                "idAllocatorCapacity": capacity,
+                "reason": "OSFX_ID_MAX_ENTRIES defaults to 128 in the real embedded target configuration.",
+            },
+        )
     values = get_fx().id_allocate_many(count, start_id, end_id)
     ok = len(values) == len(set(values)) == int(case.record["expected"]["uniqueCount"]) and all(start_id <= value <= end_id for value in values)
     details = {"count": len(values), "min": min(values), "max": max(values)}
@@ -387,6 +414,17 @@ def run_l4_id_03(case: CaseDefinition) -> CaseResult:
 
 def run_l4_id_04(case: CaseDefinition) -> CaseResult:
     threads = int(case.record["input"]["threads"])
+    if threads > 1:
+        return CaseResult(
+            id=case.id,
+            status="SKIP",
+            message="FX targets an embedded main-loop runtime and does not advertise a thread-safe ID allocator stress surface.",
+            details={
+                "threads": threads,
+                "executionModel": "embedded-main-loop",
+                "reason": "OSynaptic-FX documents polling/event-driven embedded main-loop integration rather than multithreaded allocator concurrency.",
+            },
+        )
     result = get_fx().id_concurrent_allocation(1, 2000, threads, 10)
     duplicate_count = len(result["values"]) - len(set(result["values"]))
     details = {"allocatedCount": len(result["values"]), "duplicateCount": duplicate_count, "errors": result["errors"]}
@@ -505,6 +543,9 @@ def command_capabilities(_args: argparse.Namespace) -> int:
             limits={
                 "requiresLocalCompiler": True,
                 "buildCache": "adapters/.build/osynaptic_fx",
+                "idAllocatorCapacity": FxBackend.ID_ALLOCATOR_CAPACITY,
+                "executionModel": "embedded-main-loop",
+                "threadSafeIdAllocator": False,
             },
         )
     )

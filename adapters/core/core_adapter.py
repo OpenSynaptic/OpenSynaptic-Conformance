@@ -383,12 +383,14 @@ def run_l4_hs_03(case: CaseDefinition) -> CaseResult:
     return fail_result(case, "Core does not expire the secure session back to INIT/absent state.", details)
 
 
-def run_l4_timestamp_unavailable(case: CaseDefinition) -> CaseResult:
-    return fail_result(
-        case,
-        "Current Core handshake surface does not expose timestamp replay checking as an independently callable adapter API.",
-        {"reason": "OSHandshakeManager lacks a public timestamp-accept/replay/out-of-order predicate"},
-    )
+def run_l4_timestamp(case: CaseDefinition) -> CaseResult:
+    timestamps = [int(ts) for ts in case.record["input"]["timestamps"]]
+    expected = [str(r) for r in case.record["expected"]["results"]]
+    actual = get_core().timestamp_check(1, timestamps)
+    details = {"timestamps": timestamps, "expected": expected, "actual": actual}
+    if actual == expected:
+        return pass_result(case, "Core timestamp anti-replay classification matches the canonical expectations.", details)
+    return fail_result(case, "Core timestamp anti-replay classification does not match the canonical expectations.", details)
 
 
 def run_l4_id_01(case: CaseDefinition) -> CaseResult:
@@ -465,9 +467,9 @@ def run_l4_disp_03(case: CaseDefinition) -> CaseResult:
 def summarize_script_run(result: dict[str, Any]) -> dict[str, Any]:
     stdout = ANSI_RE.sub("", result["stdout"])
     summary = {"returncode": result["returncode"], "stdout": truncate_text(stdout), "stderr": truncate_text(result["stderr"])}
-    match = re.search(r"总计\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)", stdout)
-    if match:
-        total, passed, failed, skipped = [int(item) for item in match.groups()]
+    matches = list(re.finditer(r"总计\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)", stdout))
+    if matches:
+        total, passed, failed, skipped = [int(item) for item in matches[-1].groups()]
         summary.update({
             "total": total,
             "passed": passed,
@@ -487,9 +489,37 @@ def run_l5_suite(case: CaseDefinition) -> CaseResult:
     }
     run = get_core().script_run(script_mapping[case.id], timeout=300)
     details = summarize_script_run(run)
-    if run["returncode"] == 0:
-        return pass_result(case, "Core exhaustive suite completed successfully.", details)
-    return fail_result(case, "Core exhaustive suite did not complete successfully.", details)
+    expected = dict(case.record.get("expected", {}))
+    has_structured_totals = all(isinstance(details.get(key), int) for key in ("total", "passed", "failed", "skipped"))
+    nominal_total = int(expected.get("nominalTotal", 0)) if expected.get("nominalTotal") is not None else None
+    minimum_pass_rate = float(expected.get("minimumPassRate", 1.0))
+    maximum_known_skips = expected.get("maximumKnownSkips")
+
+    checks = {
+        "returncodeOk": run["returncode"] == 0,
+        "hasStructuredTotals": has_structured_totals,
+        "meetsNominalTotal": False,
+        "hasNoUnexpectedFailures": False,
+        "meetsMinimumPassRate": False,
+        "withinKnownSkips": maximum_known_skips is None,
+    }
+    if has_structured_totals:
+        checks["meetsNominalTotal"] = nominal_total is None or int(details["total"]) >= nominal_total
+        checks["hasNoUnexpectedFailures"] = int(details["failed"]) == 0
+        checks["meetsMinimumPassRate"] = float(details.get("passRate", 0.0)) >= minimum_pass_rate
+        if maximum_known_skips is not None:
+            checks["withinKnownSkips"] = int(details["skipped"]) <= int(maximum_known_skips)
+
+    details["expected"] = {
+        "nominalTotal": nominal_total,
+        "minimumPassRate": minimum_pass_rate,
+        "maximumKnownSkips": maximum_known_skips,
+    }
+    details["checks"] = checks
+
+    if all(bool(value) for value in checks.values()):
+        return pass_result(case, "Core exhaustive suite satisfied the L5 aggregate acceptance thresholds.", details)
+    return fail_result(case, "Core exhaustive suite did not satisfy the L5 aggregate acceptance thresholds.", details)
 
 
 def execute_case(case: CaseDefinition) -> CaseResult:
@@ -528,7 +558,7 @@ def execute_case(case: CaseDefinition) -> CaseResult:
     if case.id == "L4-HS-03":
         return run_l4_hs_03(case)
     if case.id in {"L4-TS-01", "L4-TS-02", "L4-TS-03"}:
-        return run_l4_timestamp_unavailable(case)
+        return run_l4_timestamp(case)
     if case.id == "L4-ID-01":
         return run_l4_id_01(case)
     if case.id == "L4-ID-02":

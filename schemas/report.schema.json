@@ -55,6 +55,9 @@
       "type": "object",
       "additionalProperties": true
     },
+    "aggregateSummary": {
+      "$ref": "#/$defs/aggregateSummary"
+    },
     "summary": {
       "$ref": "#/$defs/summary"
     },
@@ -131,6 +134,49 @@
             "PARTIAL",
             "ERROR"
           ]
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "aggregateSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "passed",
+        "failed",
+        "skipped"
+      ],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "suiteCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source": {
+          "type": "string"
         },
         "note": {
           "type": "string"

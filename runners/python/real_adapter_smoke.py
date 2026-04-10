@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -44,6 +45,13 @@ SMOKE_TARGETS = (
     ),
 )
 
+L5_CORE_TARGET = SmokeTarget(
+    name="opensynaptic-core-l5",
+    adapter=Path("adapters/core/manifest.v1.json"),
+    profile=Path("profiles/l5-full-ecosystem/l5-full-ecosystem.profile.v1.json"),
+    report=Path("reports/generated/core-adapter.l5.smoke.report.json"),
+)
+
 
 def result_id(entry: dict[str, object]) -> str:
     value = entry.get("id") or entry.get("caseId") or "<unknown>"
@@ -77,9 +85,24 @@ def run_target(target: SmokeTarget) -> tuple[bool, str]:
     return True, ""
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Run the real adapter smoke suite")
+    parser.add_argument(
+        "--include-l5-core",
+        action="store_true",
+        help="also run the OpenSynaptic Core L5 full-ecosystem profile and write its generated report",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
     failures: list[str] = []
-    for target in SMOKE_TARGETS:
+    targets = list(SMOKE_TARGETS)
+    if args.include_l5_core:
+        targets.append(L5_CORE_TARGET)
+
+    for target in targets:
         ok, message = run_target(target)
         if not ok:
             failures.append(message)

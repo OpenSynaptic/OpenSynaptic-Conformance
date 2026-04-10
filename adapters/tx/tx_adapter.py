@@ -116,7 +116,6 @@ def run_l1_frame(case: CaseDefinition) -> CaseResult:
     try:
         rebuilt = get_tx().packet_build(
             header["cmd"],
-            header["route"],
             header["aid"],
             header["tid"],
             header["timestamp_raw"],

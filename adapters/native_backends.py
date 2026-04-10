@@ -113,6 +113,11 @@ def _c_buffer_to_str(raw: bytes) -> str:
 
 
 class TxBackend:
+    CRC8_POLY = 0x07
+    CRC8_INIT = 0x00
+    CRC16_POLY = 0x1021
+    CRC16_INIT = 0xFFFF
+
     SOURCE_NAMES = [
         "ostx_b62.c",
         "ostx_crc.c",
@@ -136,33 +141,29 @@ class TxBackend:
     def _configure(self) -> None:
         self.lib.ostx_b62_encode.argtypes = [ctypes.c_uint32, ctypes.c_char_p, ctypes.c_size_t]
         self.lib.ostx_b62_encode.restype = ctypes.c_int
-        self.lib.ostx_crc8.argtypes = [ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t]
+        self.lib.ostx_crc8.argtypes = [ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_uint16, ctypes.c_uint8]
         self.lib.ostx_crc8.restype = ctypes.c_uint8
-        self.lib.ostx_crc16.argtypes = [ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t]
+        self.lib.ostx_crc16.argtypes = [ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_uint16, ctypes.c_uint16]
         self.lib.ostx_crc16.restype = ctypes.c_uint16
         self.lib.ostx_packet_build.argtypes = [
             ctypes.c_uint8,
-            ctypes.c_uint8,
             ctypes.c_uint32,
             ctypes.c_uint8,
-            ctypes.c_uint64,
+            ctypes.c_uint32,
             ctypes.POINTER(ctypes.c_uint8),
-            ctypes.c_size_t,
             ctypes.POINTER(ctypes.c_uint8),
-            ctypes.c_size_t,
         ]
-        self.lib.ostx_packet_build.restype = ctypes.c_size_t
+        self.lib.ostx_packet_build.restype = ctypes.c_int
         self.lib.ostx_sensor_pack.argtypes = [
             ctypes.c_uint32,
             ctypes.c_uint8,
-            ctypes.c_uint64,
-            ctypes.c_char_p,
-            ctypes.c_char_p,
             ctypes.c_uint32,
+            ctypes.c_char_p,
+            ctypes.c_char_p,
+            ctypes.c_int32,
             ctypes.POINTER(ctypes.c_uint8),
-            ctypes.c_size_t,
         ]
-        self.lib.ostx_sensor_pack.restype = ctypes.c_size_t
+        self.lib.ostx_sensor_pack.restype = ctypes.c_int
 
     def _as_array(self, data: bytes) -> Any:
         return (ctypes.c_uint8 * len(data)).from_buffer_copy(data)
@@ -175,25 +176,22 @@ class TxBackend:
         return buffer.value.decode("utf-8")
 
     def crc8(self, data: bytes) -> int:
-        return int(self.lib.ostx_crc8(self._as_array(data), len(data)))
+        return int(self.lib.ostx_crc8(self._as_array(data), len(data), self.CRC8_POLY, self.CRC8_INIT))
 
     def crc16(self, data: bytes) -> int:
-        return int(self.lib.ostx_crc16(self._as_array(data), len(data)))
+        return int(self.lib.ostx_crc16(self._as_array(data), len(data), self.CRC16_POLY, self.CRC16_INIT))
 
-    def packet_build(self, cmd: int, route: int, aid: int, tid: int, timestamp: int, body: bytes) -> bytes:
+    def packet_build(self, cmd: int, aid: int, tid: int, timestamp: int, body: bytes) -> bytes:
         payload = self._as_array(body) if body else None
         output = (ctypes.c_uint8 * 512)()
         size = int(
             self.lib.ostx_packet_build(
                 cmd,
-                route,
                 aid,
                 tid,
                 timestamp,
                 payload,
-                len(body),
                 output,
-                len(output),
             )
         )
         if size <= 0:
@@ -211,7 +209,6 @@ class TxBackend:
                 unit.encode("utf-8"),
                 int(scaled),
                 output,
-                len(output),
             )
         )
         if size <= 0:
@@ -235,13 +232,18 @@ class RxPacketMeta(ctypes.Structure):
 
 class RxSensorField(ctypes.Structure):
     _fields_ = [
-        ("sensor_id", ctypes.c_char * 32),
-        ("unit", ctypes.c_char * 16),
-        ("scaled", ctypes.c_int32),
+        ("sensor_id", ctypes.c_char * 9),
+        ("unit", ctypes.c_char * 9),
+        ("scaled", ctypes.c_long),
     ]
 
 
 class RxBackend:
+    CRC8_POLY = 0x07
+    CRC8_INIT = 0x00
+    CRC16_POLY = 0x1021
+    CRC16_INIT = 0xFFFF
+
     SOURCE_NAMES = [
         "osrx_b62.c",
         "osrx_crc.c",
@@ -262,15 +264,15 @@ class RxBackend:
         self._configure()
 
     def _configure(self) -> None:
-        self.lib.osrx_b62_decode.argtypes = [ctypes.c_char_p, ctypes.POINTER(ctypes.c_uint32)]
-        self.lib.osrx_b62_decode.restype = ctypes.c_int
-        self.lib.osrx_crc8.argtypes = [ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t]
+        self.lib.osrx_b62_decode.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(ctypes.c_int)]
+        self.lib.osrx_b62_decode.restype = ctypes.c_int32
+        self.lib.osrx_crc8.argtypes = [ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_uint16, ctypes.c_uint8]
         self.lib.osrx_crc8.restype = ctypes.c_uint8
-        self.lib.osrx_crc16.argtypes = [ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t]
+        self.lib.osrx_crc16.argtypes = [ctypes.POINTER(ctypes.c_uint8), ctypes.c_int, ctypes.c_uint16, ctypes.c_uint16]
         self.lib.osrx_crc16.restype = ctypes.c_uint16
         self.lib.osrx_packet_decode.argtypes = [
             ctypes.POINTER(ctypes.c_uint8),
-            ctypes.c_size_t,
+            ctypes.c_int,
             ctypes.POINTER(RxPacketMeta),
         ]
         self.lib.osrx_packet_decode.restype = ctypes.c_int
@@ -286,17 +288,18 @@ class RxBackend:
         return (ctypes.c_uint8 * len(data)).from_buffer_copy(data)
 
     def base62_decode(self, text: str) -> int:
-        output = ctypes.c_uint32(0)
-        rc = self.lib.osrx_b62_decode(text.encode("utf-8"), ctypes.byref(output))
-        if rc != 1:
+        encoded = text.encode("utf-8")
+        ok = ctypes.c_int(0)
+        value = int(self.lib.osrx_b62_decode(encoded, len(encoded), ctypes.byref(ok)))
+        if ok.value != 1:
             raise RuntimeError(f"osrx_b62_decode failed for {text!r}")
-        return int(output.value)
+        return value
 
     def crc8(self, data: bytes) -> int:
-        return int(self.lib.osrx_crc8(self._as_array(data), len(data)))
+        return int(self.lib.osrx_crc8(self._as_array(data), len(data), self.CRC8_POLY, self.CRC8_INIT))
 
     def crc16(self, data: bytes) -> int:
-        return int(self.lib.osrx_crc16(self._as_array(data), len(data)))
+        return int(self.lib.osrx_crc16(self._as_array(data), len(data), self.CRC16_POLY, self.CRC16_INIT))
 
     def packet_decode(self, packet: bytes) -> dict[str, Any]:
         meta = RxPacketMeta()
@@ -445,7 +448,7 @@ class FxIdAllocator(ctypes.Structure):
         ("adaptive_enabled", ctypes.c_int),
         ("recent_window_start", ctypes.c_uint64),
         ("recent_alloc_count", ctypes.c_uint32),
-        ("entries", FxIdAllocatorEntry * 1024),
+        ("entries", FxIdAllocatorEntry * 128),
     ]
 
 
@@ -464,6 +467,7 @@ class FxDispatchResult(ctypes.Structure):
 
 
 class FxBackend:
+    ID_ALLOCATOR_CAPACITY = 128
     SOURCE_NAMES = [
         "osfx_solidity.c",
         "osfx_fusion_packet.c",
@@ -536,12 +540,14 @@ class FxBackend:
             ctypes.c_uint8,
             ctypes.c_uint64,
             ctypes.c_char_p,
-            ctypes.c_char_p,
             ctypes.c_double,
+            ctypes.c_char_p,
             ctypes.POINTER(ctypes.c_uint8),
             ctypes.c_size_t,
+            ctypes.POINTER(ctypes.c_int),
+            ctypes.POINTER(ctypes.c_uint8),
         ]
-        self.lib.osfx_core_encode_sensor_packet_auto.restype = ctypes.c_size_t
+        self.lib.osfx_core_encode_sensor_packet_auto.restype = ctypes.c_int
         self.lib.osfx_core_encode_multi_sensor_packet_auto.argtypes = [
             ctypes.POINTER(FxFusionState),
             ctypes.c_uint32,
@@ -692,22 +698,26 @@ class FxBackend:
         value: float,
     ) -> bytes:
         output = (ctypes.c_uint8 * 512)()
-        size = int(
+        packet_len = ctypes.c_int(0)
+        out_cmd = ctypes.c_uint8(0)
+        rc = int(
             self.lib.osfx_core_encode_sensor_packet_auto(
                 ctypes.byref(state),
                 aid,
                 tid,
                 timestamp,
                 sensor_id.encode("utf-8"),
-                unit.encode("utf-8"),
                 float(value),
+                unit.encode("utf-8"),
                 output,
                 len(output),
+                ctypes.byref(packet_len),
+                ctypes.byref(out_cmd),
             )
         )
-        if size <= 0:
+        if rc != 1 or packet_len.value <= 0:
             raise RuntimeError("osfx_core_encode_sensor_packet_auto failed")
-        return bytes(output[:size])
+        return bytes(output[: packet_len.value])
 
     def encode_multi_sensor_packet(
         self,
@@ -922,6 +932,9 @@ class FxBackend:
                 raise RuntimeError(f"osfx_id_allocate failed at index {index}")
             values.append(int(aid.value))
         return values
+
+    def id_allocator_capacity(self) -> int:
+        return self.ID_ALLOCATOR_CAPACITY
 
     def id_exhaustion(self, start_id: int, end_id: int, lease_seconds: int = 60, start_ts: int = 1_710_000_000) -> dict[str, Any]:
         allocator = FxIdAllocator()
@@ -1218,6 +1231,16 @@ class CoreBackend:
                 "after": after,
                 "existsAfter": key in manager.secure_sessions,
             }
+
+    def timestamp_check(self, aid: int, timestamps: list[int]) -> list[str]:
+        """Evaluate each timestamp in sequence for the given AID.
+
+        Returns a list of 'ACCEPT', 'REPLAY', or 'OUT_OF_ORDER' strings, one
+        per input timestamp.  Uses a fresh handshake-manager context so the
+        watermark starts clean for every call (matches conformance-test intent).
+        """
+        with self.handshake_manager_context() as manager:
+            return [manager.check_timestamp(aid, ts) for ts in timestamps]
 
     def id_allocate_many(self, count: int, start_id: int, end_id: int, base_lease_seconds: int = 60) -> list[int]:
         self._ensure_imported()

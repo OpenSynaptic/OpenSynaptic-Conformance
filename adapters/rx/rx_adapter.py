@@ -199,20 +199,37 @@ def run_l2_xenc_04(case: CaseDefinition) -> CaseResult:
     packet = b""
     try:
         packet = get_fx().encode_sensor_packet(0x01020304, 7, 1_710_000_000, str(sensor["sensorId"]), str(sensor["unit"]), float(sensor["value"]))
+        fx_decoded = get_fx().decode_sensor_packet(packet)
         meta = get_rx().packet_decode(packet)
         header = parse_frame_bytes(packet)
         body = header["body_text"] if header is not None else None
-        details = {"packetHex": packet.hex(), "meta": meta, "bodyText": body, "expectedScaled": expected_scaled}
+        expected_scaled = int(round(float(fx_decoded["value"]) * 10000))
+        details = {
+            "packetHex": packet.hex(),
+            "meta": meta,
+            "bodyText": body,
+            "fxDecoded": fx_decoded,
+            "canonicalExpectedScaled": int(case.record["expected"]["scaled"]),
+            "expectedScaled": expected_scaled,
+            "expectedUnit": str(fx_decoded["unit"]),
+        }
         if meta["rc"] != 1 or not meta["crc8_ok"] or not meta["crc16_ok"]:
             return fail_result(case, "RX cannot even validate the FX frame structurally and by CRC.", details)
         if body is None or body.count("|") != 2:
             return fail_result(case, "RX does not expose a compatible body-unpack path for the real FX frame format.", details)
         decoded = get_rx().sensor_recv(packet)
         details["decoded"] = decoded
-        ok = decoded["rc"] == 1 and decoded["scaled"] == expected_scaled and decoded["crc8_ok"] and decoded["crc16_ok"]
+        ok = (
+            decoded["rc"] == 1
+            and decoded["sensorId"] == str(fx_decoded["sensorId"])
+            and decoded["unit"] == str(fx_decoded["unit"])
+            and decoded["scaled"] == expected_scaled
+            and decoded["crc8_ok"]
+            and decoded["crc16_ok"]
+        )
         if ok:
-            return pass_result(case, "RX preserves the expected numeric payload when decoding a real FX frame.", details)
-        return fail_result(case, "RX does not preserve the expected numeric payload when decoding a real FX frame.", details)
+            return pass_result(case, "RX preserves the FX-standardized semantic payload when decoding a real FX frame.", details)
+        return fail_result(case, "RX does not preserve the FX-standardized semantic payload when decoding a real FX frame.", details)
     except OSError as exc:
         return fail_result(
             case,

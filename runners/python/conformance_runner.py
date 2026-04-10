@@ -133,6 +133,10 @@ class AssetValidator:
         self.adapter_manifests: dict[Path, dict[str, Any]] = {}
         self.schemas: dict[Path, dict[str, Any]] = {}
 
+    @staticmethod
+    def _should_skip_generated_json(path: Path) -> bool:
+        return any(part in {".build", "__pycache__"} for part in path.parts)
+
     def validate(self) -> tuple[dict[str, AssetStatus], dict[str, Any]]:
         self._load_schemas()
         self._load_vector_sets()
@@ -150,15 +154,23 @@ class AssetValidator:
             data = self._load_json(path)
             asset_map["schemas"].append((self._rel(path), str(data.get("$id", ""))))
         for path in sorted((self.root / "profiles").rglob("*.json")):
+            if self._should_skip_generated_json(path):
+                continue
             data = self._load_json(path)
             asset_map["profiles"].append((self._rel(path), str(data.get("profileId", ""))))
         for path in sorted((self.root / "vectors").rglob("*.json")):
+            if self._should_skip_generated_json(path):
+                continue
             data = self._load_json(path)
             asset_map["vectors"].append((self._rel(path), str(data.get("vectorSetId", ""))))
         for path in sorted((self.root / "datasets").rglob("*.json")):
+            if self._should_skip_generated_json(path):
+                continue
             data = self._load_json(path)
             asset_map["datasets"].append((self._rel(path), str(data.get("datasetId", ""))))
         for path in sorted((self.root / "adapters").rglob("*.json")):
+            if self._should_skip_generated_json(path):
+                continue
             data = self._load_json(path)
             asset_map["adapters"].append((self._rel(path), str(data.get("adapterId", ""))))
         return asset_map
@@ -184,6 +196,8 @@ class AssetValidator:
     def _load_vector_sets(self) -> None:
         seen_ids: dict[str, str] = {}
         for path in sorted((self.root / "vectors").rglob("*.json")):
+            if self._should_skip_generated_json(path):
+                continue
             rel = self._rel(path)
             data = self._safe_load(path, "vector-set")
             if data is None:
@@ -218,6 +232,8 @@ class AssetValidator:
     def _load_profiles(self) -> None:
         seen_ids: dict[str, str] = {}
         for path in sorted((self.root / "profiles").rglob("*.json")):
+            if self._should_skip_generated_json(path):
+                continue
             rel = self._rel(path)
             data = self._safe_load(path, "profile")
             if data is None:
@@ -242,6 +258,8 @@ class AssetValidator:
     def _load_dataset_manifests(self) -> None:
         seen_ids: dict[str, str] = {}
         for path in sorted((self.root / "datasets").rglob("*.json")):
+            if self._should_skip_generated_json(path):
+                continue
             rel = self._rel(path)
             data = self._safe_load(path, "dataset-manifest")
             if data is None:
@@ -286,6 +304,8 @@ class AssetValidator:
     def _load_adapter_manifests(self) -> None:
         seen_ids: dict[str, str] = {}
         for path in sorted((self.root / "adapters").rglob("*.json")):
+            if self._should_skip_generated_json(path):
+                continue
             rel = self._rel(path)
             data = self._safe_load(path, "adapter-manifest")
             if data is None:
@@ -755,12 +775,21 @@ def validate_report_payload(
             errors.append("report implementation.adapter does not match manifest")
 
     summary = payload.get("summary")
+    aggregate_summary = payload.get("aggregateSummary")
     if not isinstance(summary, dict):
         errors.append("report summary field is missing or invalid")
     else:
         missing_summary = REQUIRED_REPORT_SUMMARY_KEYS.difference(summary)
         if missing_summary:
             errors.append(f"report summary missing keys: {sorted(missing_summary)}")
+    if aggregate_summary is not None:
+        if not isinstance(aggregate_summary, dict):
+            errors.append("report aggregateSummary field is invalid")
+        else:
+            required_aggregate_keys = {"total", "passed", "failed", "skipped"}
+            missing_aggregate = required_aggregate_keys.difference(aggregate_summary)
+            if missing_aggregate:
+                errors.append(f"report aggregateSummary missing keys: {sorted(missing_aggregate)}")
 
     results = payload.get("results")
     if not isinstance(results, list) or not results:
@@ -803,6 +832,29 @@ def validate_report_payload(
             errors.append("report summary.total does not match result count")
         if summary.get("status") == "PASS" and failed_result_count:
             errors.append("report summary.status is PASS but results contain failures")
+
+        pass_criteria = profile.get("passCriteria", {}) if isinstance(profile.get("passCriteria"), dict) else {}
+        skip_policy = profile.get("skipPolicy", {}) if isinstance(profile.get("skipPolicy"), dict) else {}
+        evaluation = aggregate_summary if isinstance(aggregate_summary, dict) else summary
+        if pass_criteria.get("policy") == "threshold" and summary.get("status") == "PASS":
+            eval_total = evaluation.get("total")
+            eval_passed = evaluation.get("passed")
+            eval_failed = evaluation.get("failed")
+            eval_skipped = evaluation.get("skipped")
+            eval_pass_rate = evaluation.get("passRate")
+            if isinstance(eval_total, int) and isinstance(eval_passed, int) and isinstance(eval_skipped, int) and not isinstance(eval_pass_rate, (int, float)):
+                denom = eval_total - eval_skipped
+                eval_pass_rate = 1.0 if denom <= 0 else eval_passed / denom
+            minimum_passed = pass_criteria.get("minimumPassed")
+            minimum_pass_rate = pass_criteria.get("minimumPassRate")
+            if isinstance(eval_failed, int) and eval_failed > 0:
+                errors.append("report summary.status is PASS but threshold aggregate contains failures")
+            if isinstance(minimum_passed, int) and (not isinstance(eval_passed, int) or eval_passed < minimum_passed):
+                errors.append("report summary.status is PASS but aggregate passed count is below profile minimumPassed")
+            if isinstance(minimum_pass_rate, (int, float)) and (not isinstance(eval_pass_rate, (int, float)) or float(eval_pass_rate) < float(minimum_pass_rate)):
+                errors.append("report summary.status is PASS but aggregate pass rate is below profile minimumPassRate")
+            if not bool(skip_policy.get("allowed")) and isinstance(eval_skipped, int) and eval_skipped > 0:
+                errors.append("report summary.status is PASS but profile skipPolicy does not allow skips")
 
     return errors
 
