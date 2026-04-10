@@ -52,6 +52,8 @@ L5_CORE_TARGET = SmokeTarget(
     report=Path("reports/generated/core-adapter.l5.smoke.report.json"),
 )
 
+ALL_TARGETS = {target.name: target for target in (*SMOKE_TARGETS, L5_CORE_TARGET)}
+
 
 def result_id(entry: dict[str, object]) -> str:
     value = entry.get("id") or entry.get("caseId") or "<unknown>"
@@ -88,6 +90,12 @@ def run_target(target: SmokeTarget) -> tuple[bool, str]:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the real adapter smoke suite")
     parser.add_argument(
+        "--target",
+        action="append",
+        choices=sorted(ALL_TARGETS),
+        help="run only the named smoke target; may be specified multiple times",
+    )
+    parser.add_argument(
         "--include-l5-core",
         action="store_true",
         help="also run the OpenSynaptic Core L5 full-ecosystem profile and write its generated report",
@@ -98,9 +106,12 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     failures: list[str] = []
-    targets = list(SMOKE_TARGETS)
-    if args.include_l5_core:
-        targets.append(L5_CORE_TARGET)
+    if args.target:
+        targets = [ALL_TARGETS[name] for name in args.target]
+    else:
+        targets = list(SMOKE_TARGETS)
+        if args.include_l5_core:
+            targets.append(L5_CORE_TARGET)
 
     for target in targets:
         ok, message = run_target(target)
