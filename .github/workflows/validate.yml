@@ -62,43 +62,26 @@ jobs:
 
       - name: Smoke real implementation adapter - OpenSynaptic Core
         id: smoke_core
-        continue-on-error: true
         run: python runners/python/real_adapter_smoke.py --target opensynaptic-core
 
       - name: Smoke real implementation adapter - OSynaptic-FX
         id: smoke_fx
-        continue-on-error: true
+        if: always()
         run: python runners/python/real_adapter_smoke.py --target osynaptic-fx
 
       - name: Smoke real implementation adapter - OSynaptic-RX
         id: smoke_rx
-        continue-on-error: true
+        if: always()
         run: python runners/python/real_adapter_smoke.py --target osynaptic-rx
 
       - name: Smoke real implementation adapter - OSynaptic-TX
         id: smoke_tx
-        continue-on-error: true
+        if: always()
         run: python runners/python/real_adapter_smoke.py --target osynaptic-tx
 
       - name: Run repository CLI tests
-        run: python -m unittest discover -s tests/python -p "test_*.py" -v
-
-      - name: Fail if any real adapter smoke target failed
         if: always()
-        shell: bash
-        run: |
-          echo "opensynaptic-core: ${{ steps.smoke_core.outcome }}"
-          echo "osynaptic-fx: ${{ steps.smoke_fx.outcome }}"
-          echo "osynaptic-rx: ${{ steps.smoke_rx.outcome }}"
-          echo "osynaptic-tx: ${{ steps.smoke_tx.outcome }}"
-
-          if [[ "${{ steps.smoke_core.outcome }}" != "success" || \
-                "${{ steps.smoke_fx.outcome }}" != "success" || \
-                "${{ steps.smoke_rx.outcome }}" != "success" || \
-                "${{ steps.smoke_tx.outcome }}" != "success" ]]; then
-            echo "One or more real adapter smoke targets failed"
-            exit 1
-          fi
+        run: python -m unittest discover -s tests/python -p "test_*.py" -v
 
       - name: Upload generated reports
         if: always()
