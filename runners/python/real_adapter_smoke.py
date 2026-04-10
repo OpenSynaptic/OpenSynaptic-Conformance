@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -60,6 +61,13 @@ def result_id(entry: dict[str, object]) -> str:
     return str(value)
 
 
+def emit_actions_error(title: str, message: str) -> None:
+    if os.getenv("GITHUB_ACTIONS") != "true":
+        return
+    escaped = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+    print(f"::error title={title}::{escaped}")
+
+
 def run_target(target: SmokeTarget) -> tuple[bool, str]:
     adapter_path = ROOT / target.adapter
     profile_path = ROOT / target.profile
@@ -68,7 +76,9 @@ def run_target(target: SmokeTarget) -> tuple[bool, str]:
     print(f"[SMOKE] {target.name} :: {target.profile.as_posix()}")
     exit_code = command_verify_adapter(ROOT, adapter_path, profile_path, None, [], report_path)
     if exit_code not in {0, 1}:
-        return False, f"{target.name}: verify-adapter returned unexpected exit code {exit_code}"
+        message = f"{target.name}: verify-adapter returned unexpected exit code {exit_code}"
+        emit_actions_error(target.name, message)
+        return False, message
 
     report = load_json_file(report_path)
     summary = report.get("summary", {})
@@ -78,7 +88,12 @@ def run_target(target: SmokeTarget) -> tuple[bool, str]:
         if isinstance(entry, dict) and str(entry.get("status")) == "ERROR"
     ]
     if str(summary.get("status")) == "ERROR" or error_results:
-        return False, f"{target.name}: adapter reported runtime errors in cases {error_results}"
+        message = (
+            f"{target.name}: adapter reported runtime errors; "
+            f"summaryStatus={summary.get('status')} errorCases={error_results}"
+        )
+        emit_actions_error(target.name, message)
+        return False, message
 
     print(
         f"  summary: status={summary.get('status')} passed={summary.get('passed')} "
