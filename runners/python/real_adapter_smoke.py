@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import io
 import os
+from contextlib import redirect_stdout
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -68,15 +70,33 @@ def emit_actions_error(title: str, message: str) -> None:
     print(f"::error title={title}::{escaped}")
 
 
+def summarize_diagnostics(output: str, max_lines: int = 12, max_chars: int = 1500) -> str:
+    lines = [line.rstrip() for line in output.splitlines() if line.strip()]
+    if not lines:
+        return ""
+    summary = "\n".join(lines[-max_lines:])
+    if len(summary) > max_chars:
+        summary = summary[-max_chars:]
+    return summary
+
+
 def run_target(target: SmokeTarget) -> tuple[bool, str]:
     adapter_path = ROOT / target.adapter
     profile_path = ROOT / target.profile
     report_path = ROOT / target.report
 
     print(f"[SMOKE] {target.name} :: {target.profile.as_posix()}")
-    exit_code = command_verify_adapter(ROOT, adapter_path, profile_path, None, [], report_path)
+    transcript_buffer = io.StringIO()
+    with redirect_stdout(transcript_buffer):
+        exit_code = command_verify_adapter(ROOT, adapter_path, profile_path, None, [], report_path)
+    transcript = transcript_buffer.getvalue().strip()
+    if transcript:
+        print(transcript)
     if exit_code not in {0, 1}:
         message = f"{target.name}: verify-adapter returned unexpected exit code {exit_code}"
+        diagnostic_summary = summarize_diagnostics(transcript)
+        if diagnostic_summary:
+            message = f"{message}\n{diagnostic_summary}"
         emit_actions_error(target.name, message)
         return False, message
 
