@@ -1,0 +1,20 @@
+{
+  "repositories": {
+    "opensynaptic": {
+      "repository": "OpenSynaptic/OpenSynaptic",
+      "ref": "64b2e1319451c543fec6d8eeb71edbe1d8a479b9"
+    },
+    "osynaptic_fx": {
+      "repository": "OpenSynaptic/OSynaptic-FX",
+      "ref": "0d292f593b3adb19bc2c4aee41d47e488aa2d2b7"
+    },
+    "osynaptic_rx": {
+      "repository": "OpenSynaptic/OSynaptic-RX",
+      "ref": "44d3c5fa65bbdf52d58c0db3e0d4a8928d343d3c"
+    },
+    "osynaptic_tx": {
+      "repository": "OpenSynaptic/OSynaptic-TX",
+      "ref": "df25687557c0f4c445966754bbc402294b0b730e"
+    }
+  }
+}

@@ -8,9 +8,13 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: OpenSynaptic-Conformance
@@ -21,31 +25,51 @@ jobs:
         with:
           path: OpenSynaptic-Conformance
 
+      - name: Load locked sibling refs
+        id: sibling_refs
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          config = json.loads(Path("config/sibling-refs.json").read_text(encoding="utf-8"))
+          output_path = Path(os.environ["GITHUB_OUTPUT"])
+          with output_path.open("a", encoding="utf-8") as handle:
+              for name, spec in config["repositories"].items():
+                  print(f"{name}_repository={spec['repository']}", file=handle)
+                  print(f"{name}_ref={spec['ref']}", file=handle)
+          PY
+
       - name: Checkout OpenSynaptic
         uses: actions/checkout@v6
         with:
-          repository: OpenSynaptic/OpenSynaptic
+          repository: ${{ steps.sibling_refs.outputs.opensynaptic_repository }}
+          ref: ${{ steps.sibling_refs.outputs.opensynaptic_ref }}
           path: OpenSynaptic
           fetch-depth: 1
 
       - name: Checkout OSynaptic-FX
         uses: actions/checkout@v6
         with:
-          repository: OpenSynaptic/OSynaptic-FX
+          repository: ${{ steps.sibling_refs.outputs.osynaptic_fx_repository }}
+          ref: ${{ steps.sibling_refs.outputs.osynaptic_fx_ref }}
           path: OSynaptic-FX
           fetch-depth: 1
 
       - name: Checkout OSynaptic-RX
         uses: actions/checkout@v6
         with:
-          repository: OpenSynaptic/OSynaptic-RX
+          repository: ${{ steps.sibling_refs.outputs.osynaptic_rx_repository }}
+          ref: ${{ steps.sibling_refs.outputs.osynaptic_rx_ref }}
           path: OSynaptic-RX
           fetch-depth: 1
 
       - name: Checkout OSynaptic-TX
         uses: actions/checkout@v6
         with:
-          repository: OpenSynaptic/OSynaptic-TX
+          repository: ${{ steps.sibling_refs.outputs.osynaptic_tx_repository }}
+          ref: ${{ steps.sibling_refs.outputs.osynaptic_tx_ref }}
           path: OSynaptic-TX
           fetch-depth: 1
 

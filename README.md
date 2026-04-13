@@ -93,6 +93,7 @@ This repository should not become:
 | `vectors/` | Golden vectors and known-answer test inputs/outputs |
 | `datasets/` | Canonical datasets, exhaustive datasets, and generators |
 | `schemas/` | JSON schemas or equivalent contracts for repository artifacts |
+| `config/` | Locked sibling implementation revisions and other reproducibility inputs |
 | `runners/` | Shared execution entry points for verification workflows |
 | `adapters/` | Per-implementation integration layers |
 | `reports/` | Baseline conformance reports and compatibility summaries |
@@ -133,6 +134,8 @@ Every certification or compatibility claim should be traceable to:
 - a profile version
 - a dataset version
 - a generated report artifact
+
+The repository-owned validate workflow also resolves sibling implementation checkouts from [config/sibling-refs.json](config/sibling-refs.json). That lock file is the reproducible input for ecosystem smoke validation and should only be advanced intentionally after the corresponding compatibility baseline has been revalidated.
 
 ## Contributing
 
