@@ -1,0 +1,111 @@
+{
+  "$schema": "https://github.com/OpenSynaptic/OpenSynaptic-Conformance/blob/main/schemas/report.schema.json",
+  "kind": "conformance-report",
+  "schemaVersion": "1.0.0",
+  "reportId": "mock-run-profile-20260415T140755Z",
+  "createdAt": "2026-04-15T14:07:55.104082Z",
+  "repositoryVersion": "0b6bf0b",
+  "profileId": "opensynaptic.l2-protocol-conformant",
+  "datasetVersion": "1.0.0",
+  "implementation": {
+    "name": "OpenSynaptic Mock Adapter",
+    "version": "1.0.0",
+    "adapter": "opensynaptic-mock",
+    "target": "contract-example",
+    "commit": "0b6bf0b"
+  },
+  "environment": {
+    "pythonVersion": "3.13.13",
+    "runner": "mock-adapter"
+  },
+  "summary": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "status": "PASS",
+    "note": "Repository-local synthetic pass used for contract validation."
+  },
+  "results": [
+    {
+      "id": "L2-XENC-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L2-XENC-02",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L2-XENC-03",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L2-XENC-04",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L2-XENC-05",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L2-XENC-06",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L2-MULTI-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L2-CRC-CROSS-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    }
+  ]
+}

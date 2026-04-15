@@ -84,8 +84,17 @@ jobs:
       - name: Verify mock adapter against L1 profile
         run: python runners/python/conformance_runner.py verify-adapter --adapter adapters/mock/manifest.v1.json --profile profiles/l1-wire-compatible/l1-wire-compatible.profile.v1.json --write-report reports/generated/mock-adapter.l1.report.json
 
+      - name: Verify mock adapter against L2 profile
+        run: python runners/python/conformance_runner.py verify-adapter --adapter adapters/mock/manifest.v1.json --profile profiles/l2-protocol-conformant/l2-protocol-conformant.profile.v1.json --write-report reports/generated/mock-adapter.l2.report.json
+
       - name: Verify mock adapter against L3 profile
         run: python runners/python/conformance_runner.py verify-adapter --adapter adapters/mock/manifest.v1.json --profile profiles/l3-fusion-certified/l3-fusion-certified.profile.v1.json --write-report reports/generated/mock-adapter.l3.report.json
+
+      - name: Verify mock adapter against L4 profile
+        run: python runners/python/conformance_runner.py verify-adapter --adapter adapters/mock/manifest.v1.json --profile profiles/l4-security-validated/l4-security-validated.profile.v1.json --write-report reports/generated/mock-adapter.l4.report.json
+
+      - name: Verify mock adapter against L5 profile
+        run: python runners/python/conformance_runner.py verify-adapter --adapter adapters/mock/manifest.v1.json --profile profiles/l5-full-ecosystem/l5-full-ecosystem.profile.v1.json --write-report reports/generated/mock-adapter.l5.report.json
 
       - name: Smoke real implementation adapter - OpenSynaptic Core
         id: smoke_core

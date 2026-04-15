@@ -6,7 +6,7 @@
   "version": "1.0.0",
   "title": "OpenSynaptic L1 Wire Compatible",
   "level": "L1",
-  "status": "draft",
+  "status": "stable",
   "description": "Bit-level compatibility for CRC, Base62, frame layout, and guard behavior.",
   "appliesTo": [
     "core",

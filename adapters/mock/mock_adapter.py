@@ -64,12 +64,81 @@ def detect_dataset_path(profile_path: Path, profile: dict[str, Any], explicit_da
     return None
 
 
+def _suite_details(case_id: str, dataset: dict[str, Any] | None, mode: str) -> dict[str, Any]:
+    """Build result details, injecting nested aggregate counts when the dataset provides them."""
+    base: dict[str, Any] = {"adapterMode": mode, "source": "repository-mock-adapter"}
+    if dataset is None:
+        return base
+    for case in dataset.get("cases", []):
+        if case.get("id") != case_id:
+            continue
+        expected = case.get("expected", {})
+        nominal_total = expected.get("nominalTotal")
+        if not isinstance(nominal_total, int):
+            break
+        max_skips = expected.get("maximumKnownSkips", 0)
+        skipped = max_skips if isinstance(max_skips, int) else 0
+        passed = nominal_total - skipped
+        base.update({"total": nominal_total, "passed": passed, "failed": 0, "skipped": skipped})
+        break
+    return base
+
+
+def _build_aggregate_summary(results: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Aggregate nested suite totals from result details, mirroring shared_runtime logic."""
+    nested: list[tuple[int, int, int, int]] = []
+    for result in results:
+        d = result.get("details", {})
+        vals = [d.get(k) for k in ("total", "passed", "failed", "skipped")]
+        if not all(isinstance(v, int) for v in vals):
+            return None
+        nested.append((int(vals[0]), int(vals[1]), int(vals[2]), int(vals[3])))
+    if not nested:
+        return None
+    total = sum(v[0] for v in nested)
+    passed = sum(v[1] for v in nested)
+    failed = sum(v[2] for v in nested)
+    skipped = sum(v[3] for v in nested)
+    denom = total - skipped
+    pass_rate = 1.0 if denom <= 0 else passed / denom
+    return {
+        "total": total,
+        "passed": passed,
+        "failed": failed,
+        "skipped": skipped,
+        "passRate": pass_rate,
+        "suiteCount": len(nested),
+        "source": "nested-result-details",
+    }
+
+
+def _threshold_status(profile: dict[str, Any], evaluation: dict[str, Any]) -> str:
+    """Determine PASS/FAIL for threshold-based profiles."""
+    pass_criteria = profile.get("passCriteria") if isinstance(profile.get("passCriteria"), dict) else {}
+    if not isinstance(pass_criteria, dict) or pass_criteria.get("policy") != "threshold":
+        return "PASS"
+    minimum_passed = pass_criteria.get("minimumPassed")
+    minimum_pass_rate = pass_criteria.get("minimumPassRate")
+    ev_passed = evaluation.get("passed", 0)
+    ev_total = evaluation.get("total", 0)
+    ev_skipped = evaluation.get("skipped", 0)
+    if isinstance(minimum_passed, int) and int(ev_passed) < minimum_passed:
+        return "FAIL"
+    if isinstance(minimum_pass_rate, (int, float)):
+        denom = int(ev_total) - int(ev_skipped)
+        rate = 1.0 if denom <= 0 else int(ev_passed) / denom
+        if rate < float(minimum_pass_rate):
+            return "FAIL"
+    return "PASS"
+
+
 def build_report(
     manifest: dict[str, Any],
     profile: dict[str, Any],
     case_ids: list[str],
     dataset_version: str | None,
     mode: str,
+    dataset: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     commit = detect_git_commit()
     results = [
@@ -78,15 +147,18 @@ def build_report(
             "status": "PASS",
             "message": f"Synthetic contract pass via mock adapter ({mode}).",
             "durationMs": 0.0,
-            "details": {
-                "adapterMode": mode,
-                "source": "repository-mock-adapter",
-            },
+            "details": _suite_details(case_id, dataset, mode),
         }
         for case_id in case_ids
     ]
 
-    return {
+    aggregate_summary = _build_aggregate_summary(results)
+    evaluation = aggregate_summary or {
+        "total": len(results), "passed": len(results), "failed": 0, "skipped": 0,
+    }
+    status = _threshold_status(profile, evaluation)
+
+    report: dict[str, Any] = {
         "$schema": f"{SCHEMA_BASE}/report.schema.json",
         "kind": "conformance-report",
         "schemaVersion": "1.0.0",
@@ -111,11 +183,14 @@ def build_report(
             "passed": len(results),
             "failed": 0,
             "skipped": 0,
-            "status": "PASS",
+            "status": status,
             "note": "Repository-local synthetic pass used for contract validation.",
         },
         "results": results,
     }
+    if aggregate_summary is not None:
+        report["aggregateSummary"] = aggregate_summary
+    return report
 
 
 def emit(payload: dict[str, Any]) -> int:
@@ -171,9 +246,11 @@ def command_run_profile(args: argparse.Namespace) -> int:
     profile = load_json(profile_path)
     dataset_path = detect_dataset_path(profile_path, profile, Path(args.dataset).resolve() if args.dataset else None)
     dataset_version = None
+    dataset: dict[str, Any] | None = None
     if dataset_path is not None:
-        dataset_version = load_json(dataset_path).get("version")
-    report = build_report(manifest, profile, collect_required_case_ids(profile), dataset_version, "run-profile")
+        dataset = load_json(dataset_path)
+        dataset_version = dataset.get("version")
+    report = build_report(manifest, profile, collect_required_case_ids(profile), dataset_version, "run-profile", dataset=dataset)
     return emit(report)
 
 
@@ -193,9 +270,11 @@ def command_run_cases(args: argparse.Namespace) -> int:
 
     dataset_path = detect_dataset_path(profile_path, profile, Path(args.dataset).resolve() if args.dataset else None)
     dataset_version = None
+    dataset: dict[str, Any] | None = None
     if dataset_path is not None:
-        dataset_version = load_json(dataset_path).get("version")
-    report = build_report(manifest, profile, args.cases, dataset_version, "run-cases")
+        dataset = load_json(dataset_path)
+        dataset_version = dataset.get("version")
+    report = build_report(manifest, profile, args.cases, dataset_version, "run-cases", dataset=dataset)
     return emit(report)
 
 

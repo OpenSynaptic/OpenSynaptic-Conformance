@@ -6,7 +6,7 @@
   "version": "1.0.0",
   "title": "OpenSynaptic L2 Protocol Conformant",
   "level": "L2",
-  "status": "draft",
+  "status": "stable",
   "description": "Cross-implementation packet exchange, field agreement, and CRC cross-checks on top of L1 wire compatibility.",
   "appliesTo": [
     "core",

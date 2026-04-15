@@ -1,0 +1,91 @@
+{
+  "$schema": "https://github.com/OpenSynaptic/OpenSynaptic-Conformance/blob/main/schemas/report.schema.json",
+  "kind": "conformance-report",
+  "schemaVersion": "1.0.0",
+  "reportId": "mock-run-profile-20260415T140753Z",
+  "createdAt": "2026-04-15T14:07:53.896675Z",
+  "repositoryVersion": "0b6bf0b",
+  "profileId": "opensynaptic.l3-fusion-certified",
+  "datasetVersion": "1.0.0",
+  "implementation": {
+    "name": "OpenSynaptic Mock Adapter",
+    "version": "1.0.0",
+    "adapter": "opensynaptic-mock",
+    "target": "contract-example",
+    "commit": "0b6bf0b"
+  },
+  "environment": {
+    "pythonVersion": "3.13.13",
+    "runner": "mock-adapter"
+  },
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "status": "PASS",
+    "note": "Repository-local synthetic pass used for contract validation."
+  },
+  "results": [
+    {
+      "id": "L3-STRAT-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L3-STRAT-02",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L3-DIFF-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L3-DIFF-02",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L3-HEART-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L3-CROSS-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    }
+  ]
+}

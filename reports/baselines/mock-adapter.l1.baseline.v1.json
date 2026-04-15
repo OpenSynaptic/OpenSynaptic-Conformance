@@ -1,0 +1,371 @@
+{
+  "$schema": "https://github.com/OpenSynaptic/OpenSynaptic-Conformance/blob/main/schemas/report.schema.json",
+  "kind": "conformance-report",
+  "schemaVersion": "1.0.0",
+  "reportId": "mock-run-profile-20260415T140753Z",
+  "createdAt": "2026-04-15T14:07:53.303704Z",
+  "repositoryVersion": "0b6bf0b",
+  "profileId": "opensynaptic.l1-wire-compatible",
+  "datasetVersion": null,
+  "implementation": {
+    "name": "OpenSynaptic Mock Adapter",
+    "version": "1.0.0",
+    "adapter": "opensynaptic-mock",
+    "target": "contract-example",
+    "commit": "0b6bf0b"
+  },
+  "environment": {
+    "pythonVersion": "3.13.13",
+    "runner": "mock-adapter"
+  },
+  "summary": {
+    "total": 34,
+    "passed": 34,
+    "failed": 0,
+    "skipped": 0,
+    "status": "PASS",
+    "note": "Repository-local synthetic pass used for contract validation."
+  },
+  "results": [
+    {
+      "id": "L1-CRC8-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-CRC8-02",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-CRC8-03",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-CRC16-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-CRC16-02",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-CRC16-03",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-CRC16-04",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-02",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-03",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-04",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-05",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-06",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-07",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-08",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-09",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-10",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-11",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-12",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-13",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-14",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-15",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-16",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62-17",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62D-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62D-02",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62D-03",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62D-04",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62D-05",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-B62D-06",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-FRAME-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-FRAME-02",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-FRAME-03",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    },
+    {
+      "id": "L1-FRAME-04",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter"
+      }
+    }
+  ]
+}

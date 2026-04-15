@@ -1,0 +1,96 @@
+{
+  "$schema": "https://github.com/OpenSynaptic/OpenSynaptic-Conformance/blob/main/schemas/report.schema.json",
+  "kind": "conformance-report",
+  "schemaVersion": "1.0.0",
+  "reportId": "mock-run-profile-20260415T140754Z",
+  "createdAt": "2026-04-15T14:07:54.525631Z",
+  "repositoryVersion": "0b6bf0b",
+  "profileId": "opensynaptic.l5-full-ecosystem",
+  "datasetVersion": "1.0.0",
+  "implementation": {
+    "name": "OpenSynaptic Mock Adapter",
+    "version": "1.0.0",
+    "adapter": "opensynaptic-mock",
+    "target": "contract-example",
+    "commit": "0b6bf0b"
+  },
+  "environment": {
+    "pythonVersion": "3.13.13",
+    "runner": "mock-adapter"
+  },
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "status": "PASS",
+    "note": "Repository-local synthetic pass used for contract validation."
+  },
+  "results": [
+    {
+      "id": "L5-SUITE-01",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter",
+        "total": 985,
+        "passed": 983,
+        "failed": 0,
+        "skipped": 2
+      }
+    },
+    {
+      "id": "L5-SUITE-02",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter",
+        "total": 205,
+        "passed": 205,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "id": "L5-SUITE-03",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter",
+        "total": 43,
+        "passed": 43,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "id": "L5-SUITE-04",
+      "status": "PASS",
+      "message": "Synthetic contract pass via mock adapter (run-profile).",
+      "durationMs": 0.0,
+      "details": {
+        "adapterMode": "run-profile",
+        "source": "repository-mock-adapter",
+        "total": 24,
+        "passed": 24,
+        "failed": 0,
+        "skipped": 0
+      }
+    }
+  ],
+  "aggregateSummary": {
+    "total": 1257,
+    "passed": 1255,
+    "failed": 0,
+    "skipped": 2,
+    "passRate": 1.0,
+    "suiteCount": 4,
+    "source": "nested-result-details"
+  }
+}

@@ -14,26 +14,38 @@ It does not host the production implementation source code for OpenSynaptic Core
 
 ## Status
 
-**Current phase: Adapter integration** — all initial infrastructure milestones are complete. Active work is focused on closing real-adapter `FAIL` and `SKIP` gaps identified during smoke validation.
+**Current phase: Adapter integration** — all initial infrastructure milestones are complete.
 
-The repository now has stable machine-readable profiles, datasets, schemas, adapter manifests, an executable mock adapter, CI-ready runner entry points, and active repository-backed adapters for OpenSynaptic Core, OSynaptic-FX, OSynaptic-RX, and OSynaptic-TX.
+The repository now has stable machine-readable profiles, datasets, schemas, adapter manifests, an executable mock adapter, CI-ready runner entry points, active repository-backed adapters for OpenSynaptic Core, OSynaptic-FX, OSynaptic-RX, and OSynaptic-TX, and published mock adapter baseline reports for all five conformance levels.
 
 Current validation posture:
 
-- mock adapter runs remain the strict PASS baseline for repository-owned contract coverage
+- L1 and L2 profiles are **stable**; L3 and L4 are **draft** pending clean real-adapter runs
+- mock adapter runs L1–L5 all pass and serve as the strict PASS baseline for repository-owned contract coverage
 - real adapters are wired into smoke validation against representative profiles
 - real-adapter smoke treats contract/runtime `ERROR` as regressions while preserving honest `FAIL` and `SKIP` results for current implementation gaps
 
 **Next steps:**
 
 - resolve remaining `FAIL`/`SKIP` results in real-adapter smoke runs
+- promote L3 and L4 profiles to `stable` once real-adapter runs are clean
 - advance `config/sibling-refs.json` after each revalidated release
-- publish first official baseline report to `reports/`
+- promote real-adapter baseline reports to `reports/baselines/` once a clean run is achieved
 
 Seeded documents already present in this repository:
 
 - [OpenSynaptic Technical Whitepaper](docs/whitepaper/OpenSynaptic_Technical_Whitepaper.md)
 - [OpenSynaptic Certification Process](docs/certification/OpenSynaptic_Certification_Process.md)
+
+Published mock adapter baselines (see [reports/baselines/](reports/baselines/)):
+
+| Profile | Cases | Aggregate |
+| --- | --- | --- |
+| L1 Wire Compatible | 34/34 | — |
+| L2 Protocol Conformant | 8/8 | — |
+| L3 Fusion Certified | 6/6 | — |
+| L4 Security Validated | 13/13 | — |
+| L5 Full Ecosystem | 4 suites | 1255/1257 (skipped=2) |
 
 Seeded machine-readable assets already present in this repository:
 
