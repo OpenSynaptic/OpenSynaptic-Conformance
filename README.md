@@ -14,7 +14,7 @@ It does not host the production implementation source code for OpenSynaptic Core
 
 ## Status
 
-Adapter integration phase.
+**Current phase: Adapter integration** — all initial infrastructure milestones are complete. Active work is focused on closing real-adapter `FAIL` and `SKIP` gaps identified during smoke validation.
 
 The repository now has stable machine-readable profiles, datasets, schemas, adapter manifests, an executable mock adapter, CI-ready runner entry points, and active repository-backed adapters for OpenSynaptic Core, OSynaptic-FX, OSynaptic-RX, and OSynaptic-TX.
 
@@ -23,6 +23,12 @@ Current validation posture:
 - mock adapter runs remain the strict PASS baseline for repository-owned contract coverage
 - real adapters are wired into smoke validation against representative profiles
 - real-adapter smoke treats contract/runtime `ERROR` as regressions while preserving honest `FAIL` and `SKIP` results for current implementation gaps
+
+**Next steps:**
+
+- resolve remaining `FAIL`/`SKIP` results in real-adapter smoke runs
+- advance `config/sibling-refs.json` after each revalidated release
+- publish first official baseline report to `reports/`
 
 Seeded documents already present in this repository:
 
@@ -111,12 +117,12 @@ This keeps policy and branding separate from the reproducible technical evidence
 
 ## Initial Milestones
 
-1. Move the whitepaper and certification process into versioned documentation under `docs/`.
-2. Publish the first machine-readable L1 and L2 profiles.
-3. Add CRC, Base62, FULL, DIFF, HEART, and control-command golden vectors.
-4. Define report schemas for official baseline output.
-5. Ship a reference runner that can verify OpenSynaptic Core, FX, RX, and TX against the same assets.
-6. Freeze an executable adapter contract with repository-owned smoke coverage and CI enforcement.
+1. ✅ Move the whitepaper and certification process into versioned documentation under `docs/`.
+2. ✅ Publish the first machine-readable L1 and L2 profiles.
+3. ✅ Add CRC, Base62, FULL, DIFF, HEART, and control-command golden vectors.
+4. ✅ Define report schemas for official baseline output.
+5. ✅ Ship a reference runner that can verify OpenSynaptic Core, FX, RX, and TX against the same assets.
+6. ✅ Freeze an executable adapter contract with repository-owned smoke coverage and CI enforcement.
 
 ## Data And Reproducibility Policy
 
