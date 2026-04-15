@@ -11,5 +11,9 @@ Additional sections such as protocol reference and operator guides can be added 
 
 Current seeded documents:
 
-- [OpenSynaptic Technical Whitepaper](whitepaper/OpenSynaptic_Technical_Whitepaper.md)
-- [OpenSynaptic Certification Process](certification/OpenSynaptic_Certification_Process.md)
+| Document | English | 中文 |
+|----------|---------|------|
+| Technical Whitepaper | [OpenSynaptic_Technical_Whitepaper.md](whitepaper/OpenSynaptic_Technical_Whitepaper.md) | [OpenSynaptic_Technical_Whitepaper_zh.md](whitepaper/OpenSynaptic_Technical_Whitepaper_zh.md) |
+| Certification Process | [OpenSynaptic_Certification_Process.md](certification/OpenSynaptic_Certification_Process.md) | [OpenSynaptic_Certification_Process_zh.md](certification/OpenSynaptic_Certification_Process_zh.md) |
+
+The English files are the canonical versions. Chinese files carry the `_zh` suffix and are kept in sync.

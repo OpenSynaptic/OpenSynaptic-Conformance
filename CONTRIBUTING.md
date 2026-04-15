@@ -52,6 +52,12 @@ If a pull request changes normative behavior, include at least one of the follow
 3. Run the appropriate shared verification workflow.
 4. Regenerate any committed baseline report that is intentionally affected.
 
+## Language Policy
+
+All technical assets — schemas, profiles, vectors, datasets, Python source, and YAML CI — are written in English and must remain English-only.
+
+Normative documentation in `docs/` is maintained in English as the canonical form. A Chinese translation may accompany any document and must be stored alongside the English file with the `_zh` suffix (e.g. `Foo.md` → `Foo_zh.md`). When content changes, both files should be updated together in the same pull request.
+
 ## Repository Principles
 
 - Keep implementation-neutral language whenever possible.
