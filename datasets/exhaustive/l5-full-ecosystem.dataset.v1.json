@@ -48,11 +48,12 @@
           "PortForwarder rules",
           "TestPlugin",
           "DisplayAPI",
-          "Plugin registry"
+          "Plugin registry",
+          "EnhancedPortForwarder Suite G"
         ]
       },
       "expected": {
-        "nominalTotal": 205,
+        "nominalTotal": 245,
         "minimumPassRate": 1.0
       }
     },

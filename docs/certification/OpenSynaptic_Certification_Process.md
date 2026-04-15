@@ -2,7 +2,7 @@
 
 **Version**: 1.0 · 2026-04-09
 **Companion document**: [Core Technical Whitepaper](OpenSynaptic_Technical_Whitepaper.md)
-**Applies to**: OpenSynaptic Core v1.3.x / OSynaptic-FX v1.0.x / OSynaptic-RX v1.0.x / OSynaptic-TX v1.0.x
+**Applies to**: OpenSynaptic Core v1.3.x / v1.4.x / OSynaptic-FX v1.0.x / OSynaptic-RX v1.0.x / OSynaptic-TX v1.0.x
 
 > 中文版 / Chinese version: [OpenSynaptic_Certification_Process_zh.md](OpenSynaptic_Certification_Process_zh.md)
 
@@ -1058,7 +1058,7 @@ Each time a sub-library releases a new version, the following certification matr
   Version: [version string]
   Test date: [YYYY-MM-DD]
   Test environment: [OS / compiler / platform]
-  Reference implementation: OpenSynaptic Core v1.3.1
+  Reference implementation: OpenSynaptic Core v1.4.0
 
   ─────────────────────────────────────────────────────────
   Test Results
@@ -1117,7 +1117,7 @@ Each time a sub-library releases a new version, the following certification matr
 ═══════════════════════════════════════════════════════════
 
   Certification date: [YYYY-MM-DD]
-  Reference version: Core v1.3.1
+  Reference version: Core v1.4.0
 
   Implementation      L1    L2    L3    L4    L5
   ─────────────────   ───   ───   ───   ───   ───

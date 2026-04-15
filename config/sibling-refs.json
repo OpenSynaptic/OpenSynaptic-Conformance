@@ -2,7 +2,7 @@
   "repositories": {
     "opensynaptic": {
       "repository": "OpenSynaptic/OpenSynaptic",
-      "ref": "64b2e1319451c543fec6d8eeb71edbe1d8a479b9"
+      "ref": "13ad7101b58f8be33144b6286f7bb7bfdc539c62"
     },
     "osynaptic_fx": {
       "repository": "OpenSynaptic/OSynaptic-FX",

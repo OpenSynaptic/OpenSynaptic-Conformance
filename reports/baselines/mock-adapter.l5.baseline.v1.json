@@ -49,8 +49,8 @@
       "details": {
         "adapterMode": "run-profile",
         "source": "repository-mock-adapter",
-        "total": 205,
-        "passed": 205,
+        "total": 245,
+        "passed": 245,
         "failed": 0,
         "skipped": 0
       }
@@ -85,8 +85,8 @@
     }
   ],
   "aggregateSummary": {
-    "total": 1257,
-    "passed": 1255,
+    "total": 1297,
+    "passed": 1295,
     "failed": 0,
     "skipped": 2,
     "passRate": 1.0,
