@@ -9,7 +9,7 @@
   "datasetClass": "exhaustive",
   "source": {
     "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
-    "section": "7. L5 Full Ecosystem 认证"
+    "section": "7. L5 Full Ecosystem Certification"
   },
   "appliesTo": [
     "core",

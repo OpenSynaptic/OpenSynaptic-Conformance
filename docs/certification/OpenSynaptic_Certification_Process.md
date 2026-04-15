@@ -1,219 +1,221 @@
-# OpenSynaptic 测试与认证流程
+# OpenSynaptic Testing and Certification Process
 
-**版本**：1.0 · 2026-04-09  
-**配套文档**：[核心技术白皮书](OpenSynaptic_Technical_Whitepaper.md)  
-**适用对象**：OpenSynaptic Core v1.3.x / OSynaptic-FX v1.0.x / OSynaptic-RX v1.0.x / OSynaptic-TX v1.0.x  
+**Version**: 1.0 · 2026-04-09
+**Companion document**: [Core Technical Whitepaper](OpenSynaptic_Technical_Whitepaper.md)
+**Applies to**: OpenSynaptic Core v1.3.x / OSynaptic-FX v1.0.x / OSynaptic-RX v1.0.x / OSynaptic-TX v1.0.x
 
----
-
-## 目录
-
-1. [认证体系概述](#1-认证体系概述)
-2. [认证等级定义](#2-认证等级定义)
-3. [L1 Wire Compatible 认证](#3-l1-wire-compatible-认证)
-4. [L2 Protocol Conformant 认证](#4-l2-protocol-conformant-认证)
-5. [L3 Fusion Certified 认证](#5-l3-fusion-certified-认证)
-6. [L4 Security Validated 认证](#6-l4-security-validated-认证)
-7. [L5 Full Ecosystem 认证](#7-l5-full-ecosystem-认证)
-8. [跨实现互操作性验证](#8-跨实现互操作性验证)
-9. [回归测试与持续认证](#9-回归测试与持续认证)
-10. [认证报告模板](#10-认证报告模板)
+> 中文版 / Chinese version: [OpenSynaptic_Certification_Process_zh.md](OpenSynaptic_Certification_Process_zh.md)
 
 ---
 
-## 1. 认证体系概述
+## Table of Contents
 
-### 1.1 设计原则
+1. [Certification System Overview](#1-certification-system-overview)
+2. [Certification Level Definitions](#2-certification-level-definitions)
+3. [L1 Wire Compatible Certification](#3-l1-wire-compatible-certification)
+4. [L2 Protocol Conformant Certification](#4-l2-protocol-conformant-certification)
+5. [L3 Fusion Certified Certification](#5-l3-fusion-certified-certification)
+6. [L4 Security Validated Certification](#6-l4-security-validated-certification)
+7. [L5 Full Ecosystem Certification](#7-l5-full-ecosystem-certification)
+8. [Cross-Implementation Interoperability Verification](#8-cross-implementation-interoperability-verification)
+9. [Regression Testing and Continuous Certification](#9-regression-testing-and-continuous-certification)
+10. [Certification Report Templates](#10-certification-report-templates)
 
-OpenSynaptic 认证体系遵循以下核心原则：
+---
 
-1. **极端可验证**：每项认证测试均有确定性的已知答案向量（KAT），任何人可独立重现
-2. **分层递进**：从位级兼容（L1）到全生态系统（L5），逐级叠加
-3. **跨实现互验**：不信任自测，要求异构实现间交叉验证
-4. **零假阴性**：认证测试不允许跳过或降级，仅已知设计限制可标记 SKIP
-5. **自动化驱动**：所有认证测试可通过 CI/CD 自动执行
+## 1. Certification System Overview
 
-### 1.2 认证矩阵
+### 1.1 Design Principles
+
+The OpenSynaptic certification system follows these core principles:
+
+1. **Extreme verifiability**: every certification test has a deterministic known-answer vector (KAT) that any party can independently reproduce
+2. **Layered progression**: from bit-level compatibility (L1) to full-ecosystem coverage (L5), each level builds on the previous
+3. **Cross-implementation cross-checking**: self-testing is not trusted; heterogeneous implementations must cross-validate each other
+4. **Zero false negatives**: certification tests may not be skipped or downgraded; only documented design limitations may be marked SKIP
+5. **Automation-driven**: all certification tests can be executed automatically via CI/CD
+
+### 1.2 Certification Matrix
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     认证等级递进图                                │
+│                  Certification Level Progression                  │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  L1 Wire Compatible ──▶ L2 Protocol Conformant                 │
-│       (CRC/B62/帧)          (跨实现互验)                         │
-│            │                      │                              │
-│            │                      ▼                              │
-│            │               L3 Fusion Certified                  │
-│            │                (FULL/DIFF/HEART)                    │
-│            │                      │                              │
-│            │                      ▼                              │
-│            │               L4 Security Validated                │
-│            │                (握手/会话/防重放)                     │
-│            │                      │                              │
-│            │                      ▼                              │
-│            └──────────▶ L5 Full Ecosystem                       │
-│                          (穷举/插件/正交)                         │
-│                                                                 │
+│                                                                  │
+│  L1 Wire Compatible ──▶ L2 Protocol Conformant                  │
+│    (CRC/B62/frame)         (cross-impl verification)            │
+│          │                        │                              │
+│          │                        ▼                              │
+│          │                L3 Fusion Certified                    │
+│          │                 (FULL/DIFF/HEART)                     │
+│          │                        │                              │
+│          │                        ▼                              │
+│          │                L4 Security Validated                  │
+│          │               (handshake/session/anti-replay)         │
+│          │                        │                              │
+│          │                        ▼                              │
+│          └──────────▶ L5 Full Ecosystem                         │
+│                        (exhaustive/plugins/orthogonal)           │
+│                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.3 认证适用性
+### 1.3 Certification Applicability
 
-| 待认证实现 | L1 | L2 | L3 | L4 | L5 |
-|-----------|:--:|:--:|:--:|:--:|:--:|
-| Core (Python) | 必须 | 必须 | 必须 | 必须 | 必须 |
-| FX (C99) | 必须 | 必须 | 必须 | 必须 | 可选 |
-| RX (C89) | 必须 | 必须 | N/A¹ | N/A | N/A |
-| TX (C89) | 必须 | 必须 | N/A² | N/A | N/A |
-| 第三方实现 | 必须 | 必须 | 按能力 | 按能力 | 可选 |
+| Implementation under test | L1 | L2 | L3 | L4 | L5 |
+|--------------------------|:--:|:--:|:--:|:--:|:--:|
+| Core (Python) | Required | Required | Required | Required | Required |
+| FX (C99) | Required | Required | Required | Required | Optional |
+| RX (C89) | Required | Required | N/A¹ | N/A | N/A |
+| TX (C89) | Required | Required | N/A² | N/A | N/A |
+| Third-party implementations | Required | Required | By capability | By capability | Optional |
 
-¹ RX 仅解码 DATA_FULL，不参与融合策略认证  
-² TX 仅编码 DATA_FULL，不参与融合策略认证
-
----
-
-## 2. 认证等级定义
-
-### L1 — Wire Compatible（线级兼容）
-
-**目标**：证明实现的基础编解码算法与协议线格式位级一致。
-
-**通过标准**：
-- 全部 CRC 参考向量通过
-- 全部 Base62 参考向量通过
-- 帧结构字节序验证通过
-- 帧边界条件处理正确
-
-### L2 — Protocol Conformant（协议一致）
-
-**目标**：证明不同实现之间可以交换有效数据包。
-
-**通过标准**：
-- 实现 A 编码的帧可被实现 B 正确解码
-- 所有字段提取值一致
-- CRC 交叉验证通过
-
-### L3 — Fusion Certified（融合认证）
-
-**目标**：证明 FULL/DIFF/HEART 策略选择与模板学习行为与参考实现一致。
-
-**通过标准**：
-- 连续 N 轮发送的策略序列与 Core 参考一致
-- DIFF 位掩码正确性
-- HEART 模板回放一致性
-
-### L4 — Security Validated（安全认证）
-
-**目标**：证明安全子系统（握手、会话、ID 分配）行为正确。
-
-**通过标准**：
-- 握手状态机全路径覆盖
-- 时间戳防重放功能正确
-- ID 分配无冲突、租约管理正确
-
-### L5 — Full Ecosystem（全生态认证）
-
-**目标**：证明与 OpenSynaptic Core 的全功能等价性。
-
-**通过标准**：
-- 穷举业务逻辑测试 ≥99.5% 通过
-- 插件系统功能正确
-- 正交条件组合无回归
+¹ RX decodes DATA_FULL only and does not participate in fusion strategy certification  
+² TX encodes DATA_FULL only and does not participate in fusion strategy certification
 
 ---
 
-## 3. L1 Wire Compatible 认证
+## 2. Certification Level Definitions
 
-### 3.1 CRC-8/SMBUS 参考向量测试
+### L1 — Wire Compatible
 
-#### 测试 L1-CRC8-01：标准检验向量
+**Goal**: prove that the implementation's fundamental encode/decode algorithms are bit-for-bit consistent with the protocol wire format.
+
+**Pass criteria**:
+- All CRC reference vectors pass
+- All Base62 reference vectors pass
+- Frame structure byte-order validation passes
+- Frame boundary condition handling is correct
+
+### L2 — Protocol Conformant
+
+**Goal**: prove that different implementations can exchange valid packets with each other.
+
+**Pass criteria**:
+- A frame encoded by implementation A can be correctly decoded by implementation B
+- All extracted field values are consistent
+- CRC cross-validation passes
+
+### L3 — Fusion Certified
+
+**Goal**: prove that the FULL/DIFF/HEART strategy selection and template learning behaviour is consistent with the reference implementation.
+
+**Pass criteria**:
+- The strategy sequence over N consecutive transmission rounds matches the Core reference
+- DIFF bit-mask correctness
+- HEART template replay consistency
+
+### L4 — Security Validated
+
+**Goal**: prove that the security subsystem (handshake, session, ID allocation) behaves correctly.
+
+**Pass criteria**:
+- Handshake state machine covers all paths
+- Timestamp anti-replay functions correctly
+- ID allocation is collision-free and lease management is correct
+
+### L5 — Full Ecosystem
+
+**Goal**: prove full-feature equivalence with OpenSynaptic Core.
+
+**Pass criteria**:
+- Exhaustive business-logic tests: ≥ 99.5% pass
+- Plugin system behaves correctly
+- Orthogonal condition combinations show no regressions
+
+---
+
+## 3. L1 Wire Compatible Certification
+
+### 3.1 CRC-8/SMBUS Reference Vector Tests
+
+#### Test L1-CRC8-01: Standard check vector
 
 ```
-输入：ASCII "123456789" (9 bytes: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39)
-参数：poly = 0x07, init = 0x00
-期望：0xF4
+Input:   ASCII "123456789" (9 bytes: 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39)
+Params:  poly = 0x07, init = 0x00
+Expected: 0xF4
 ```
 
-**验证代码 (C)**：
+**Verification code (C)**:
 ```c
 const uint8_t data[] = { 0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39 };
 uint8_t result = crc8(data, 9, 0x07, 0x00);
 ASSERT(result == 0xF4);
 ```
 
-**验证代码 (Python)**：
+**Verification code (Python)**:
 ```python
 from opensynaptic.utils.security.security_core import crc8_smbus
 assert crc8_smbus(b"123456789") == 0xF4
 ```
 
-#### 测试 L1-CRC8-02：单字节
+#### Test L1-CRC8-02: Single byte
 
 ```
-输入：0x01 (1 byte)
-参数：poly = 0x07, init = 0x00
-期望：0x07
+Input:   0x01 (1 byte)
+Params:  poly = 0x07, init = 0x00
+Expected: 0x07
 ```
 
-#### 测试 L1-CRC8-03：NULL/空输入
+#### Test L1-CRC8-03: NULL / empty input
 
 ```
-输入：NULL 或长度 0
-期望：返回 init 值 (0x00)，无崩溃
+Input:   NULL or length 0
+Expected: returns init value (0x00), no crash
 ```
 
-### 3.2 CRC-16/CCITT-FALSE 参考向量测试
+### 3.2 CRC-16/CCITT-FALSE Reference Vector Tests
 
-#### 测试 L1-CRC16-01：标准检验向量
+#### Test L1-CRC16-01: Standard check vector
 
 ```
-输入：ASCII "123456789"
-参数：poly = 0x1021, init = 0xFFFF
-期望：0x29B1
+Input:   ASCII "123456789"
+Params:  poly = 0x1021, init = 0xFFFF
+Expected: 0x29B1
 ```
 
-**验证代码 (C)**：
+**Verification code (C)**:
 ```c
 const uint8_t data[] = { 0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39 };
 uint16_t result = crc16(data, 9, 0x1021, 0xFFFF);
 ASSERT(result == 0x29B1);
 ```
 
-**验证代码 (Python)**：
+**Verification code (Python)**:
 ```python
 from opensynaptic.utils.security.security_core import crc16_ccitt
 assert crc16_ccitt(b"123456789") == 0x29B1
 ```
 
-#### 测试 L1-CRC16-02：单字节 0x00
+#### Test L1-CRC16-02: Single byte 0x00
 
 ```
-输入：0x00 (1 byte)
-参数：poly = 0x1021, init = 0xFFFF
-期望：0xE1F0
+Input:   0x00 (1 byte)
+Params:  poly = 0x1021, init = 0xFFFF
+Expected: 0xE1F0
 ```
 
-#### 测试 L1-CRC16-03：单字节 0xFF
+#### Test L1-CRC16-03: Single byte 0xFF
 
 ```
-输入：0xFF (1 byte)
-期望：0xFF00
+Input:   0xFF (1 byte)
+Expected: 0xFF00
 ```
 
-#### 测试 L1-CRC16-04：NULL/空输入
+#### Test L1-CRC16-04: NULL / empty input
 
 ```
-输入：NULL 或长度 0
-期望：返回 init 值 (0xFFFF)，无崩溃
+Input:   NULL or length 0
+Expected: returns init value (0xFFFF), no crash
 ```
 
-### 3.3 Base62 编码参考向量测试
+### 3.3 Base62 Encode Reference Vector Tests
 
-#### 测试 L1-B62-01 至 L1-B62-17：完整参考向量集
+#### Tests L1-B62-01 through L1-B62-17: Complete reference vector set
 
-| 编号 | 输入值 | 期望编码 | 适用实现 |
-|------|--------|---------|---------|
+| ID | Input value | Expected encoding | Applicable implementations |
+|----|-------------|------------------|---------------------------|
 | L1-B62-01 | 0 | `"0"` | Core, FX, TX |
 | L1-B62-02 | 1 | `"1"` | Core, FX, TX |
 | L1-B62-03 | 9 | `"9"` | Core, FX, TX |
@@ -223,7 +225,7 @@ assert crc16_ccitt(b"123456789") == 0x29B1
 | L1-B62-07 | 61 | `"Z"` | Core, FX, TX |
 | L1-B62-08 | 62 | `"10"` | Core, FX, TX |
 | L1-B62-09 | 3843 | `"ZZ"` | Core, FX, TX |
-| L1-B62-10 | 238328 | `"1000"` (=62³) | Core, FX, TX |
+| L1-B62-10 | 238328 | `"1000"` (= 62³) | Core, FX, TX |
 | L1-B62-11 | 215000 | `"TVK"` | Core, FX, TX, RX(dec) |
 | L1-B62-12 | -1 | `"-1"` | Core, FX, TX |
 | L1-B62-13 | -62 | `"-10"` | Core, FX, TX |
@@ -232,10 +234,10 @@ assert crc16_ccitt(b"123456789") == 0x29B1
 | L1-B62-16 | -2147483648 | `"-2lkCB2"` | Core, FX, TX |
 | L1-B62-17 | -123456789 | `"-8m0Kx"` | Core, FX, TX |
 
-### 3.4 Base62 解码参考向量测试
+### 3.4 Base62 Decode Reference Vector Tests
 
-| 编号 | 输入字符串 | 期望值 | 适用实现 |
-|------|-----------|--------|---------|
+| ID | Input string | Expected value | Applicable implementations |
+|----|-------------|---------------|---------------------------|
 | L1-B62D-01 | `"0"` | 0 | Core, FX, RX |
 | L1-B62D-02 | `"10"` | 62 | Core, FX, RX |
 | L1-B62D-03 | `"-1"` | -1 | Core, FX, RX |
@@ -243,11 +245,11 @@ assert crc16_ccitt(b"123456789") == 0x29B1
 | L1-B62D-05 | `"!bad"` | ERROR (ok=0) | Core, FX, RX |
 | L1-B62D-06 | NULL | ERROR (ok=0) | Core, FX, RX |
 
-### 3.5 帧结构字节序测试
+### 3.5 Frame Structure Byte-Order Tests
 
-#### 测试 L1-FRAME-01：标准帧构建与字段提取
+#### Test L1-FRAME-01: Standard frame construction and field extraction
 
-**测试输入**：
+**Test input**:
 ```
 cmd      = 0x3F (DATA_FULL)
 route    = 0x01
@@ -257,9 +259,9 @@ ts_sec   = 0x00001234  (48-bit: 0x000000001234)
 body     = "T1|A01|TVK" (10 bytes)
 ```
 
-**期望帧（26 字节）**：
+**Expected frame (26 bytes)**:
 ```
-字节    值 (hex)              说明
+Byte    Value (hex)           Description
 [0]     3F                    cmd
 [1]     01                    route
 [2]     01                    aid byte 3 (MSB)
@@ -279,12 +281,12 @@ body     = "T1|A01|TVK" (10 bytes)
 [25]    ZZ                    CRC-16 low byte
 ```
 
-**验证指令**：
+**Verification assertions**:
 ```c
-// 帧总长
+// Total frame length
 ASSERT(frame_len == 13 + 10 + 3);  // == 26
 
-// 字节序验证
+// Byte-order checks
 ASSERT(frame[0]  == 0x3F);          // cmd
 ASSERT(frame[1]  == 0x01);          // route
 ASSERT(frame[2]  == 0x01);          // aid[3] MSB
@@ -296,103 +298,103 @@ ASSERT(frame[7]  == 0x00);          // ts[5] MSB
 ASSERT(frame[11] == 0x12);          // ts[1]
 ASSERT(frame[12] == 0x34);          // ts[0] LSB
 
-// Body 提取
+// Body extraction
 ASSERT(memcmp(frame + 13, "T1|A01|TVK", 10) == 0);
 
-// CRC-8 验证（仅 body 计算）
+// CRC-8 (body only)
 uint8_t crc8_body = crc8(frame + 13, 10, 0x07, 0x00);
 ASSERT(frame[23] == crc8_body);
 
-// CRC-16 验证（全帧 [0..23] 计算）
+// CRC-16 (full frame [0..23])
 uint16_t crc16_all = crc16(frame, 24, 0x1021, 0xFFFF);
 ASSERT(frame[24] == (crc16_all >> 8));      // high byte
 ASSERT(frame[25] == (crc16_all & 0xFF));    // low byte
 ```
 
-#### 测试 L1-FRAME-02：最小帧（空 body）
+#### Test L1-FRAME-02: Minimum frame (empty body)
 
 ```
 body_len = 0
-期望帧长 = 13 + 0 + 3 = 16 字节
+Expected frame length = 13 + 0 + 3 = 16 bytes
 CRC-8(body={}) = init = 0x00
 CRC-16 covers [0..13] (header + crc8)
 ```
 
-#### 测试 L1-FRAME-03：过短帧拒绝
+#### Test L1-FRAME-03: Truncated frame rejection
 
 ```
-输入：长度 < 16 的字节序列
-期望：解码函数返回失败（0 或负数），不产生段错误
+Input:   byte sequence shorter than 16 bytes
+Expected: decode function returns failure (0 or negative), no segfault
 ```
 
-#### 测试 L1-FRAME-04：NULL 输入拒绝
+#### Test L1-FRAME-04: NULL input rejection
 
 ```
-输入：packet = NULL, len = 0
-期望：返回 0，不崩溃
+Input:   packet = NULL, len = 0
+Expected: returns 0, no crash
 ```
 
-### 3.6 L1 通过标准
+### 3.6 L1 Pass Criteria
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│ L1 Wire Compatible 认证通过条件                                 │
+│ L1 Wire Compatible — Pass Conditions                           │
 ├────────────────────────────────────────────────────────────────┤
 │                                                                │
-│  ✅ L1-CRC8-01 至 L1-CRC8-03        全部通过（3/3）            │
-│  ✅ L1-CRC16-01 至 L1-CRC16-04      全部通过（4/4）            │
-│  ✅ L1-B62-01 至 L1-B62-17          全部通过（17/17）           │
-│  ✅ L1-B62D-01 至 L1-B62D-06        全部通过（6/6）            │
-│  ✅ L1-FRAME-01 至 L1-FRAME-04      全部通过（4/4）            │
+│  ✅ L1-CRC8-01 through L1-CRC8-03      all pass (3/3)         │
+│  ✅ L1-CRC16-01 through L1-CRC16-04    all pass (4/4)         │
+│  ✅ L1-B62-01 through L1-B62-17        all pass (17/17)       │
+│  ✅ L1-B62D-01 through L1-B62D-06      all pass (6/6)         │
+│  ✅ L1-FRAME-01 through L1-FRAME-04    all pass (4/4)         │
 │                                                                │
-│  合计：34/34 全通过 → L1 认证通过                                │
+│  Total: 34/34 → L1 certified                                  │
 │                                                                │
-│  零容忍：任何一项失败 → L1 认证不通过                             │
+│  Zero tolerance: any failure → L1 not certified               │
 │                                                                │
 └────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 4. L2 Protocol Conformant 认证
+## 4. L2 Protocol Conformant Certification
 
-### 4.1 跨实现帧交换测试
+### 4.1 Cross-Implementation Frame Exchange Tests
 
-L2 认证的核心：一个实现编码的帧必须能被另一个实现正确解码。
+The core of L2 certification: a frame encoded by one implementation must be correctly decoded by another.
 
-#### 测试 L2-XENC-01：TX 编码 → Core 解码
+#### Test L2-XENC-01: TX encode → Core decode
 
-**步骤**：
-1. TX 编码以下传感器数据：
+**Steps**:
+1. TX encodes the following sensor data:
    ```
    aid=0x00010203, tid=7, ts_sec=1710000000
    sensor_id="T1", unit="A01"(Cel), scaled=215000 (21.5°C)
    ```
-2. 将二进制帧传递给 Core `receive()`
-3. 验证 Core 解码结果
+2. Pass the binary frame to Core `receive()`
+3. Verify Core decode result
 
-**验证**：
+**Verification**:
 ```python
 decoded = core_node.receive(tx_frame_bytes)
 assert decoded is not None
 assert decoded.get("error") is None
-assert "s1_id" in decoded  # 传感器 ID 字段存在
-assert "s1_v" in decoded   # 传感器值字段存在
+assert "s1_id" in decoded   # sensor ID field present
+assert "s1_v" in decoded    # sensor value field present
 ```
 
-#### 测试 L2-XENC-02：TX 编码 → RX 解码
+#### Test L2-XENC-02: TX encode → RX decode
 
-**步骤**：
-1. TX 使用 `ostx_sensor_pack()` 编码帧
-2. RX 使用 `osrx_sensor_recv()` 解码同一帧
+**Steps**:
+1. TX uses `ostx_sensor_pack()` to encode the frame
+2. RX uses `osrx_sensor_recv()` to decode the same frame
 
-**验证**：
+**Verification**:
 ```c
-// TX 端
+// TX side
 int tx_len = ostx_sensor_pack(aid, tid, ts, "T1", "A01", 215000, tx_buf);
 ASSERT(tx_len > 0);
 
-// RX 端
+// RX side
 osrx_packet_meta rx_meta;
 osrx_sensor_field rx_field;
 int rx_ok = osrx_sensor_recv(tx_buf, tx_len, &rx_meta, &rx_field);
@@ -405,37 +407,37 @@ ASSERT(strcmp(rx_field.unit, "A01") == 0);
 ASSERT(rx_field.scaled == 215000);
 ```
 
-#### 测试 L2-XENC-03：FX 编码 → Core 解码
+#### Test L2-XENC-03: FX encode → Core decode
 
-**步骤**：
-1. FX 使用 `osfx_core_encode_sensor_packet()` 编码
-2. 通过 UDP/文件 传递帧字节
-3. Core `receive()` 解码
+**Steps**:
+1. FX uses `osfx_core_encode_sensor_packet()` to encode
+2. Transfer frame bytes via UDP or file
+3. Core `receive()` decodes
 
-**验证**：
+**Verification**:
 ```python
 decoded = core_node.receive(fx_frame_bytes)
 assert decoded is not None
 assert abs(decoded["s1_v"] - expected_value) < tolerance
 ```
 
-#### 测试 L2-XENC-04：FX 编码 → RX 解码
+#### Test L2-XENC-04: FX encode → RX decode
 
 ```c
-// FX 编码
+// FX encode
 int fx_len = osfx_core_encode_sensor_packet(
     aid, tid, ts, "T1", 21.5, "Cel", fx_buf, sizeof(fx_buf), &pkt_len);
 
-// RX 解码
+// RX decode
 int rx_ok = osrx_sensor_recv(fx_buf, pkt_len, &meta, &field);
 ASSERT(rx_ok == 1);
 ASSERT(field.scaled == 215000);  // 21.5 × 10000
 ```
 
-#### 测试 L2-XENC-05：Core 编码 → FX 解码
+#### Test L2-XENC-05: Core encode → FX decode
 
 ```python
-# Core 编码
+# Core encode
 packet, aid, strategy = core_node.transmit(
     sensors=[['T1', 'OK', 21.5, 'Cel']],
     device_id='TEST', device_status='ONLINE'
@@ -443,20 +445,20 @@ packet, aid, strategy = core_node.transmit(
 ```
 
 ```c
-// FX 解码
+// FX decode
 osfx_packet_meta meta;
 char sid[32]; double val; char unit[24];
 int ok = osfx_core_decode_sensor_packet_auto(
     &state, packet, packet_len, sid, 32, &val, unit, 24, &meta);
 ASSERT(ok == 1);
-// 注意：Core 可能已标准化为 K，需要逆标准化比较
+// Note: Core may have standardized to K; reverse-standardize before comparison
 ```
 
-#### 测试 L2-XENC-06：Core 编码 → RX 解码
+#### Test L2-XENC-06: Core encode → RX decode
 
 ```python
 packet, _, _ = core_node.transmit(sensors=[['T1', 'OK', 21.5, 'Cel']])
-# 写入文件或通过 UDP 传递
+# Write to file or pass via UDP
 ```
 
 ```c
@@ -466,14 +468,14 @@ ASSERT(meta.crc8_ok == 1);
 ASSERT(meta.crc16_ok == 1);
 ```
 
-### 4.2 多传感器帧交换测试
+### 4.2 Multi-Sensor Frame Exchange Tests
 
-#### 测试 L2-MULTI-01：FX 多传感器 → Core 解码
+#### Test L2-MULTI-01: FX multi-sensor → Core decode
 
 ```c
 osfx_core_sensor_input sensors[] = {
-    { .sensor_id="T1", .sensor_state="OK", .value=21.5,   .unit="Cel" },
-    { .sensor_id="H1", .sensor_state="OK", .value=55.0,   .unit="%" },
+    { .sensor_id="T1", .sensor_state="OK", .value=21.5,    .unit="Cel" },
+    { .sensor_id="H1", .sensor_state="OK", .value=55.0,    .unit="%" },
     { .sensor_id="P1", .sensor_state="OK", .value=101.325, .unit="kPa" }
 };
 int len;
@@ -485,51 +487,51 @@ osfx_core_encode_multi_sensor_packet_auto(
 
 ```python
 decoded = core_node.receive(fx_multi_packet)
-assert decoded["s1_id"] is not None  # 至少3个传感器
+assert decoded["s1_id"] is not None  # at least 3 sensors
 assert decoded["s2_id"] is not None
 assert decoded["s3_id"] is not None
 ```
 
-### 4.3 CRC 交叉验证测试
+### 4.3 CRC Cross-Validation Test
 
-#### 测试 L2-CRC-CROSS-01：帧级 CRC 交叉
+#### Test L2-CRC-CROSS-01: Frame-level CRC cross-check
 
 ```
-1. 实现 A 编码帧，提取 [crc8, crc16]
-2. 实现 B 对同一帧内容重新计算 CRC
-3. 验证 A.crc8 == B.crc8(body) AND A.crc16 == B.crc16(frame)
+1. Implementation A encodes a frame; extract [crc8, crc16]
+2. Implementation B recomputes CRC on the same frame content
+3. Verify A.crc8 == B.crc8(body) AND A.crc16 == B.crc16(frame)
 ```
 
-### 4.4 L2 通过标准
+### 4.4 L2 Pass Criteria
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│ L2 Protocol Conformant 认证通过条件                              │
+│ L2 Protocol Conformant — Pass Conditions                       │
 ├────────────────────────────────────────────────────────────────┤
 │                                                                │
-│  前置：L1 已通过                                                 │
+│  Prerequisite: L1 passed                                       │
 │                                                                │
-│  ✅ L2-XENC-01 至 L2-XENC-06        全部通过（6/6）            │
-│  ✅ L2-MULTI-01                      通过                      │
-│  ✅ L2-CRC-CROSS-01                  通过                      │
+│  ✅ L2-XENC-01 through L2-XENC-06     all pass (6/6)          │
+│  ✅ L2-MULTI-01                        pass                    │
+│  ✅ L2-CRC-CROSS-01                    pass                    │
 │                                                                │
-│  合计：8/8 全通过 → L2 认证通过                                  │
+│  Total: 8/8 → L2 certified                                    │
 │                                                                │
 └────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 5. L3 Fusion Certified 认证
+## 5. L3 Fusion Certified Certification
 
-### 5.1 策略序列一致性测试
+### 5.1 Strategy Sequence Consistency Tests
 
-#### 测试 L3-STRAT-01：FULL → DIFF 切换
+#### Test L3-STRAT-01: FULL → DIFF transition
 
-**参考行为**（Core `target_sync_count=3`）：
+**Reference behaviour** (Core `target_sync_count=3`):
 
-| 轮次 | 温度(°C) | 期望策略 | 期望 CMD |
-|------|---------|---------|---------|
+| Round | Temperature (°C) | Expected strategy | Expected CMD |
+|-------|-----------------|-------------------|--------------|
 | 1 | 21.0 | FULL | 63 (0x3F) |
 | 2 | 21.5 | FULL | 63 |
 | 3 | 22.0 | FULL | 63 |
@@ -539,9 +541,9 @@ assert decoded["s3_id"] is not None
 | 7 | 23.0 | HEART | 127 |
 | 8 | 23.5 | DIFF | 170 |
 
-**验证**：
+**Verification**:
 ```c
-// FX: 8 轮编码
+// FX: 8 rounds of encoding
 uint8_t cmd_sequence[8];
 for (int i = 0; i < 8; i++) {
     osfx_easy_encode_sensor_auto(&ctx, ts + i,
@@ -555,7 +557,7 @@ ASSERT(cmd_sequence[3] == 170);  // DIFF
 ```
 
 ```python
-# Core: 同样 8 轮
+# Core: same 8 rounds
 strategies = []
 for i in range(8):
     pkt, _, strat = core_node.transmit(
@@ -565,132 +567,132 @@ assert strategies[:3] == ['FULL_PACKET'] * 3
 assert strategies[3] == 'DIFF_PACKET'
 ```
 
-#### 测试 L3-STRAT-02：配置变更强制 FULL
+#### Test L3-STRAT-02: Configuration change forces FULL
 
-**步骤**：
-1. 发送 3 轮 [T1, Cel]，建立模板
-2. 第 4 轮改为 [T1, Cel, H1, %]（增加通道）
-3. 验证第 4 轮强制 FULL
+**Steps**:
+1. Send 3 rounds of [T1, Cel] to establish template
+2. Round 4: change to [T1, Cel, H1, %] (add a channel)
+3. Verify round 4 is forced to FULL
 
-**验证**：
+**Verification**:
 ```c
-// 前 3 轮单传感器
+// First 3 rounds: single sensor
 for (int i = 0; i < 3; i++) {
     osfx_easy_encode_sensor_auto(&ctx, ts+i, "T1", 21.0+i*0.5, "Cel",
         buf, sizeof(buf), &len, &cmd);
 }
-// 第 4 轮多传感器 → 结构变更 → 强制 FULL
+// Round 4: multi-sensor → structure change → forced FULL
 sensors[0] = (osfx_core_sensor_input){ .sensor_id="T1", .value=22.5, .unit="Cel" };
 sensors[1] = (osfx_core_sensor_input){ .sensor_id="H1", .value=55.0, .unit="%" };
 osfx_easy_encode_multi_sensor_auto(&ctx, ts+3, sensors, 2,
     buf, sizeof(buf), &len, &cmd);
-ASSERT(cmd == 63);  // 必须是 FULL
+ASSERT(cmd == 63);  // must be FULL
 ```
 
-### 5.2 DIFF 位掩码正确性测试
+### 5.2 DIFF Bit-Mask Correctness Tests
 
-#### 测试 L3-DIFF-01：单通道变化
-
-```
-轮 1 (FULL): T1=21.0, H1=55.0, P1=101325
-轮 4 (DIFF): T1=21.5, H1=55.0, P1=101325  (仅 T1 变化)
-
-期望位掩码: 0b00000001 (bit 0 = T1 changed)
-DIFF body 仅含 T1 的新 B62 值
-```
-
-#### 测试 L3-DIFF-02：多通道变化
+#### Test L3-DIFF-01: Single channel changed
 
 ```
-轮 4 (DIFF): T1=22.0, H1=60.0, P1=101325  (T1 和 H1 变化)
+Round 1 (FULL): T1=21.0, H1=55.0, P1=101325
+Round 4 (DIFF): T1=21.5, H1=55.0, P1=101325  (only T1 changed)
 
-期望位掩码: 0b00000011 (bit 0 = T1, bit 1 = H1)
+Expected bitmask: 0b00000001 (bit 0 = T1 changed)
+DIFF body contains only the new B62 value for T1
 ```
 
-### 5.3 HEART 模板回放测试
-
-#### 测试 L3-HEART-01：值不变时自动 HEART
+#### Test L3-DIFF-02: Multiple channels changed
 
 ```
-轮 3 (FULL):  T1=21.0 → 学习模板
-轮 4 (DIFF):  T1=21.5 → 差异编码
-轮 5 (HEART): T1=21.5 → 值未变 → 仅时间戳更新
+Round 4 (DIFF): T1=22.0, H1=60.0, P1=101325  (T1 and H1 changed)
 
-HEART 体 = 仅时间戳 B64，无传感器字段
-解码后数据 与 轮 4 一致（除时间戳外）
+Expected bitmask: 0b00000011 (bit 0 = T1, bit 1 = H1)
 ```
 
-### 5.4 跨实现策略一致性测试
+### 5.3 HEART Template Replay Tests
 
-#### 测试 L3-CROSS-01：FX 与 Core 策略序列一致
+#### Test L3-HEART-01: Automatic HEART when values unchanged
 
 ```
-使用与 L3-STRAT-01 相同的输入序列：
+Round 3 (FULL):  T1=21.0 → template learned
+Round 4 (DIFF):  T1=21.5 → delta encoded
+Round 5 (HEART): T1=21.5 → no change → timestamp update only
+
+HEART body = timestamp B64 only, no sensor fields
+Decoded data matches round 4 (except timestamp)
+```
+
+### 5.4 Cross-Implementation Strategy Consistency Test
+
+#### Test L3-CROSS-01: FX and Core strategy sequences match
+
+```
+Use the same input sequence as L3-STRAT-01:
 21.0, 21.5, 22.0, 22.5, 23.0, 23.0, 23.0, 23.5 °C
 
-期望：FX 输出命令序列 与 Core 输出命令序列 完全一致
+Expected: FX output command sequence is identical to Core output sequence
   [63, 63, 63, 170, 170, 127, 127, 170]
 ```
 
-### 5.5 L3 通过标准
+### 5.5 L3 Pass Criteria
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│ L3 Fusion Certified 认证通过条件                                 │
+│ L3 Fusion Certified — Pass Conditions                          │
 ├────────────────────────────────────────────────────────────────┤
 │                                                                │
-│  前置：L2 已通过                                                 │
+│  Prerequisite: L2 passed                                       │
 │                                                                │
-│  ✅ L3-STRAT-01、L3-STRAT-02        策略序列正确（2/2）          │
-│  ✅ L3-DIFF-01、L3-DIFF-02          位掩码正确（2/2）           │
-│  ✅ L3-HEART-01                      模板回放正确（1/1）         │
-│  ✅ FX 策略序列 == Core 策略序列      跨实现一致                  │
+│  ✅ L3-STRAT-01, L3-STRAT-02    strategy sequences (2/2)      │
+│  ✅ L3-DIFF-01, L3-DIFF-02      bit-mask correctness (2/2)    │
+│  ✅ L3-HEART-01                  template replay (1/1)         │
+│  ✅ FX strategy seq == Core      cross-impl consistent         │
 │                                                                │
-│  合计：6/6 全通过 → L3 认证通过                                  │
+│  Total: 6/6 → L3 certified                                    │
 │                                                                │
 └────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 6. L4 Security Validated 认证
+## 6. L4 Security Validated Certification
 
-### 6.1 握手状态机测试
+### 6.1 Handshake State Machine Tests
 
-#### 测试 L4-HS-01：完整握手路径
-
-```
-步骤                         期望状态
-──────────────────────      ──────────────
-初始化                       INIT (0)
-note_plaintext_sent(aid)     PLAINTEXT_SENT (1)
-confirm_dict(aid)            DICT_READY (2)
-mark_channel(aid)            SECURE (3)
-
-should_encrypt(aid)          True
-get_key(aid)                 32B 非全零密钥
-```
-
-#### 测试 L4-HS-02：多 AID 独立性
+#### Test L4-HS-01: Complete handshake path
 
 ```
-5 个不同 AID 各自独立走完 INIT → SECURE
-验证互不干扰：
-  AID_A.state == SECURE 不影响 AID_B.state == INIT
+Step                          Expected state
+────────────────────          ──────────────
+Initialise                    INIT (0)
+note_plaintext_sent(aid)      PLAINTEXT_SENT (1)
+confirm_dict(aid)             DICT_READY (2)
+mark_channel(aid)             SECURE (3)
+
+should_encrypt(aid)           True
+get_key(aid)                  32 B non-zero key
 ```
 
-#### 测试 L4-HS-03：会话过期
+#### Test L4-HS-02: Multiple AIDs are independent
 
 ```
-设 expire_seconds = 60
-1. AID_X 进入 SECURE，last_seen = T
+5 different AIDs each independently traverse INIT → SECURE
+Verify no interference:
+  AID_A.state == SECURE does not affect AID_B.state == INIT
+```
+
+#### Test L4-HS-03: Session expiry
+
+```
+Set expire_seconds = 60
+1. AID_X enters SECURE, last_seen = T
 2. cleanup(now = T + 61)
-3. 验证 AID_X 回退到 INIT
+3. Verify AID_X reverts to INIT
 ```
 
-### 6.2 时间戳防重放测试
+### 6.2 Timestamp Anti-Replay Tests
 
-#### 测试 L4-TS-01：正常递增
+#### Test L4-TS-01: Normal monotonic increase
 
 ```
 check_and_update(aid, ts=1000) → ACCEPT
@@ -698,197 +700,197 @@ check_and_update(aid, ts=1001) → ACCEPT
 check_and_update(aid, ts=1002) → ACCEPT
 ```
 
-#### 测试 L4-TS-02：重放检测
+#### Test L4-TS-02: Replay detection
 
 ```
 check_and_update(aid, ts=1000) → ACCEPT
-check_and_update(aid, ts=1000) → REPLAY  (相同时间戳)
+check_and_update(aid, ts=1000) → REPLAY  (same timestamp)
 ```
 
-#### 测试 L4-TS-03：乱序检测
+#### Test L4-TS-03: Out-of-order detection
 
 ```
 check_and_update(aid, ts=1002) → ACCEPT
-check_and_update(aid, ts=1001) → OUT_OF_ORDER  (更小时间戳)
+check_and_update(aid, ts=1001) → OUT_OF_ORDER  (smaller timestamp)
 ```
 
-### 6.3 ID 分配测试
+### 6.3 ID Allocation Tests
 
-#### 测试 L4-ID-01：顺序分配无重复
-
-```
-范围 [1, 9999]，连续分配 200 个 ID
-验证：len(set(ids)) == 200 且 all(1 ≤ id ≤ 9999)
-```
-
-#### 测试 L4-ID-02：池耗尽
+#### Test L4-ID-01: Sequential allocation, no duplicates
 
 ```
-范围 [1, 3]，分配 4 次
-前 3 次成功，第 4 次失败（返回错误码或抛异常）
+Range [1, 9999], allocate 200 IDs consecutively
+Verify: len(set(ids)) == 200 AND all(1 ≤ id ≤ 9999)
 ```
 
-#### 测试 L4-ID-03：租约过期回收
+#### Test L4-ID-02: Pool exhaustion
 
 ```
-1. 分配 aid=X，lease=60s
-2. 标记 offline(X)
+Range [1, 3], allocate 4 times
+First 3 succeed; 4th fails (returns error code or raises exception)
+```
+
+#### Test L4-ID-03: Lease expiry and reclamation
+
+```
+1. Allocate aid=X, lease=60s
+2. Mark offline(X)
 3. cleanup(now + 61)
-4. 验证 X 可被重新分配
+4. Verify X can be reallocated
 ```
 
-#### 测试 L4-ID-04：并发分配（仅 Core/FX 网关模式）
+#### Test L4-ID-04: Concurrent allocation (Core/FX gateway mode only)
 
 ```
-20 线程同时调用 allocate()
-验证：0 重复 ID，0 race condition 异常
+20 threads call allocate() simultaneously
+Verify: 0 duplicate IDs, 0 race-condition exceptions
 ```
 
-### 6.4 握手分发与拒绝测试
+### 6.4 Handshake Dispatch and Rejection Tests
 
-#### 测试 L4-DISP-01：畸形帧拒绝
-
-```
-输入：长度 = 3 的帧
-期望：reject = MALFORMED
-```
-
-#### 测试 L4-DISP-02：CRC 失败拒绝
+#### Test L4-DISP-01: Malformed frame rejection
 
 ```
-输入：有效帧但篡改最后一字节
-期望：reject = CRC
+Input:   frame of length 3
+Expected: reject = MALFORMED
 ```
 
-#### 测试 L4-DISP-03：PING → PONG 响应
+#### Test L4-DISP-02: CRC failure rejection
 
 ```
-输入：cmd=9 (PING) 的有效帧
-期望：kind=CTRL, has_response=true, response[0]=10 (PONG)
+Input:   valid frame with last byte tampered
+Expected: reject = CRC
 ```
 
-### 6.5 L4 通过标准
+#### Test L4-DISP-03: PING → PONG response
+
+```
+Input:   valid frame with cmd=9 (PING)
+Expected: kind=CTRL, has_response=true, response[0]=10 (PONG)
+```
+
+### 6.5 L4 Pass Criteria
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│ L4 Security Validated 认证通过条件                               │
+│ L4 Security Validated — Pass Conditions                        │
 ├────────────────────────────────────────────────────────────────┤
 │                                                                │
-│  前置：L3 已通过（或 L2 对仅解码实现）                             │
+│  Prerequisite: L3 passed (or L2 for decode-only implementations)│
 │                                                                │
-│  ✅ L4-HS-01 至 L4-HS-03          握手状态机（3/3）              │
-│  ✅ L4-TS-01 至 L4-TS-03          时间戳防重放（3/3）            │
-│  ✅ L4-ID-01 至 L4-ID-04          ID 分配（4/4）               │
-│  ✅ L4-DISP-01 至 L4-DISP-03     握手分发（3/3）               │
+│  ✅ L4-HS-01 through L4-HS-03      handshake state (3/3)      │
+│  ✅ L4-TS-01 through L4-TS-03      timestamp anti-replay (3/3) │
+│  ✅ L4-ID-01 through L4-ID-04      ID allocation (4/4)        │
+│  ✅ L4-DISP-01 through L4-DISP-03  handshake dispatch (3/3)   │
 │                                                                │
-│  合计：13/13 全通过 → L4 认证通过                                │
+│  Total: 13/13 → L4 certified                                  │
 │                                                                │
 └────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 7. L5 Full Ecosystem 认证
+## 7. L5 Full Ecosystem Certification
 
-### 7.1 穷举业务逻辑测试
+### 7.1 Exhaustive Business Logic Tests
 
-参考 OpenSynaptic Core 的 `scripts/exhaustive_business_logic.py`，包含 6 个穷举套件：
+Reference `scripts/exhaustive_business_logic.py` in OpenSynaptic Core. Contains 6 exhaustive suites:
 
-#### Suite A：每单位全链路边界值（494 项）
+#### Suite A: Per-unit full-pipeline boundary values (494 items)
 
-**方法**：遍历 15 个 UCUM 库的全部单位，每个单位取 3-5 个边界值进行完整 transmit → receive 往返。
+**Method**: traverse all units in all 15 UCUM libraries; for each unit take 3–5 boundary values through a complete transmit → receive round-trip.
 
-**验收标准**：
+**Acceptance criteria**:
 ```
 relative_error = |received - expected| / max(|expected|, 1e-15)
 absolute_error = |received - expected|
 
 PASS: relative_error ≤ 0.001 OR absolute_error ≤ 0.001
-SKIP: |standardized_value| > 9.22e14  (Base62 int64 上限)
-FAIL: 其他情况
+SKIP: |standardized_value| > 9.22e14  (Base62 int64 upper limit)
+FAIL: all other cases
 ```
 
-**已知 SKIP（2 项）**：
-- `mol = 6.022e+23`：超出 Base62 编码范围
-- `AU = 1e+06`：经前缀扩展后超出范围
+**Known SKIPs (2 items)**:
+- `mol = 6.022e+23`: exceeds Base62 encoding range
+- `AU = 1e+06`: exceeds range after prefix expansion
 
-#### Suite B：多传感器跨类组合（350 项）
+#### Suite B: Multi-sensor cross-category combinations (350 items)
 
-从 15 个单位库各取代表单位，组合 C(15,k) 通道数 k∈[2,8]，每种取 ≤50 组。
+Select one representative unit from each of the 15 unit libraries; form combinations C(15,k) for channel counts k ∈ [2, 8], taking ≤ 50 groups per combination.
 
-#### Suite C：状态字穷举矩阵（56 项）
+#### Suite C: State code exhaustive matrix (56 items)
 
-7 种设备状态 × 8 种传感器状态 = 56 种组合。
+7 device states × 8 sensor states = 56 combinations.
 
 ```
-设备：ONLINE, OFFLINE, WARN, ERROR, STANDBY, BOOT, MAINT
-传感器：OK, WARN, ERR, FAULT, N/A, OFFLINE, OOL, TEST
+Device:  ONLINE, OFFLINE, WARN, ERROR, STANDBY, BOOT, MAINT
+Sensor:  OK, WARN, ERR, FAULT, N/A, OFFLINE, OOL, TEST
 ```
 
-#### Suite D：FULL→DIFF 策略递进（9 项）
+#### Suite D: FULL → DIFF strategy progression (9 items)
 
-同设备连续 8 轮发送（温度递增 0.5°C），验证策略序列。
+Same device sends 8 consecutive rounds (temperature incremented by 0.5 °C); verify strategy sequence.
 
-#### Suite E：批量发送等价性（5 项）
+#### Suite E: Batch transmit equivalence (5 items)
 
-`transmit_batch()` 返回数 = 输入条目数。
+`transmit_batch()` return count equals input entry count.
 
-#### Suite F：SI 前缀全链路（71 项）
+#### Suite F: SI prefix full pipeline (71 items)
 
-6 个十进制前缀 × 11 基础单位 + 二进制前缀 + 拒绝测试。
+6 decimal prefixes × 11 base units + binary prefixes + rejection tests.
 
-### 7.2 插件系统测试（205 项）
+### 7.2 Plugin System Tests (205 items)
 
-| 子套件 | 项数 | 覆盖 |
-|--------|------|------|
-| DatabaseManager SQLite | 14 | CRUD 操作、事务、查询 |
-| PortForwarder 规则管理 | 107 | 规则 CRUD、路由匹配、持久化 |
-| TestPlugin | 4 | 组件功能 |
-| DisplayAPI 格式化 | 44 | 数据展示 |
-| 插件注册表 | 36 | 注册/卸载/重载 |
+| Sub-suite | Items | Coverage |
+|-----------|-------|---------|
+| DatabaseManager SQLite | 14 | CRUD, transactions, queries |
+| PortForwarder rule management | 107 | Rule CRUD, routing match, persistence |
+| TestPlugin | 4 | Component function |
+| DisplayAPI formatting | 44 | Data presentation |
+| Plugin registry | 36 | Register / unregister / reload |
 
-### 7.3 安全基础设施测试（43 项）
+### 7.3 Security Infrastructure Tests (43 items)
 
-| 子套件 | 项数 | 覆盖 |
-|--------|------|------|
-| ID 分配器 | 13 | 顺序/随机/去重/释放/池/并发/持久化/耗尽 |
-| 握手状态机 | 12 | 全路径/多AID/角色/持久化/PING |
-| 环境卫士 | 8 | 资源/错误/状态 |
-| 端口转发 | 10 | 防火墙/流量/协议/代理 |
+| Sub-suite | Items | Coverage |
+|-----------|-------|---------|
+| ID allocator | 13 | Sequential/random/dedup/release/pool/concurrent/persistent/exhausted |
+| Handshake state machine | 12 | All paths/multi-AID/roles/persistence/PING |
+| Environment guard | 8 | Resources/errors/state |
+| Port forwarding | 10 | Firewall/traffic/protocol/proxy |
 
-### 7.4 正交设计测试（24 项）
+### 7.4 Orthogonal Design Tests (24 items)
 
-验证不同功能模块之间的交叉影响。
+Verifies cross-module interaction effects between different functional subsystems.
 
-### 7.5 L5 通过标准
+### 7.5 L5 Pass Criteria
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│ L5 Full Ecosystem 认证通过条件                                   │
+│ L5 Full Ecosystem — Pass Conditions                            │
 ├────────────────────────────────────────────────────────────────┤
 │                                                                │
-│  前置：L4 已通过                                                 │
+│  Prerequisite: L4 passed                                       │
 │                                                                │
-│  穷举业务：≥985/985 通过（SKIP ≤ 2）                             │
-│  插件系统：≥205/205 通过                                         │
-│  安全基础：≥43/43 通过                                           │
-│  正交设计：≥24/24 通过                                           │
+│  Exhaustive business: ≥ 985/985 pass (SKIP ≤ 2)              │
+│  Plugin system:       ≥ 205/205 pass                          │
+│  Security infra:      ≥ 43/43 pass                            │
+│  Orthogonal design:   ≥ 24/24 pass                            │
 │                                                                │
-│  总计：≥1253/1257 通过（通过率 ≥99.5%）                          │
-│        SKIP 仅限已知设计限制（KL-01 等）                          │
+│  Total: ≥ 1253/1257 pass (pass rate ≥ 99.5%)                 │
+│         SKIP restricted to known design limitations (KL-01+)   │
 │                                                                │
-│  → L5 认证通过                                                   │
+│  → L5 certified                                                │
 │                                                                │
 └────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 8. 跨实现互操作性验证
+## 8. Cross-Implementation Interoperability Verification
 
-### 8.1 黄金帧库
+### 8.1 Golden Frame Library
 
-每次 Core 版本发布时，生成标准化的 **黄金帧文件** 作为跨实现验证基准：
+Each time a Core version is released, generate standardised **golden frame files** as the cross-implementation verification baseline:
 
 ```json
 {
@@ -897,7 +899,7 @@ FAIL: 其他情况
   "frames": [
     {
       "test_id": "GOLDEN-001",
-      "description": "单传感器 FULL 帧 (TEMP, 21.5°C)",
+      "description": "Single-sensor FULL frame (TEMP, 21.5°C)",
       "input": {
         "aid": 16909060,
         "tid": 7,
@@ -917,44 +919,44 @@ FAIL: 其他情况
     },
     {
       "test_id": "GOLDEN-002",
-      "description": "三传感器 FULL 帧 (TEMP+HUM+PRESS)"
+      "description": "Three-sensor FULL frame (TEMP+HUM+PRESS)"
     },
     {
       "test_id": "GOLDEN-003",
-      "description": "负数值帧 (-40°C)"
+      "description": "Negative-value frame (-40°C)"
     },
     {
       "test_id": "GOLDEN-004",
-      "description": "极值帧 (最大/最小 int32 缩放值)"
+      "description": "Extremes frame (max/min int32 scaled values)"
     }
   ]
 }
 ```
 
-### 8.2 验证矩阵
+### 8.2 Verification Matrix
 
 ```
-                    解码端
-                Core    FX      RX
-编   Core        ✅     ✅      ✅
-码   FX          ✅     ✅      ✅
-端   TX          ✅     ✅      ✅
+               Decoder
+            Core    FX      RX
+Enc  Core    ✅     ✅      ✅
+oder FX      ✅     ✅      ✅
+     TX      ✅     ✅      ✅
 ```
 
-每个单元格代表一组 L2-XENC 测试。
+Each cell represents a set of L2-XENC tests.
 
-### 8.3 自动化互验流程
+### 8.3 Automated Cross-Verification Workflow
 
 ```
-步骤 1: Core 生成黄金帧 → golden_frames.json
-步骤 2: FX  构建时加载 golden_frames.json → 解码验证
-步骤 3: TX  构建时加载 golden_frames.json → 编码验证（与期望帧比对）
-步骤 4: RX  构建时加载 golden_frames.json → 解码验证
-步骤 5: FX  编码帧 → Core 解码验证
-步骤 6: TX  编码帧 → RX 解码验证
+Step 1: Core generates golden frames → golden_frames.json
+Step 2: FX  loads golden_frames.json at build time → decode verification
+Step 3: TX  loads golden_frames.json at build time → encode verification (compare against expected frames)
+Step 4: RX  loads golden_frames.json at build time → decode verification
+Step 5: FX  encodes frames → Core decode verification
+Step 6: TX  encodes frames → RX decode verification
 ```
 
-### 8.4 CI/CD 集成
+### 8.4 CI/CD Integration
 
 ```yaml
 # .github/workflows/certification.yml
@@ -1010,121 +1012,121 @@ jobs:
 
 ---
 
-## 9. 回归测试与持续认证
+## 9. Regression Testing and Continuous Certification
 
-### 9.1 版本兼容性矩阵
+### 9.1 Version Compatibility Matrix
 
-每次子库发布新版本时，必须重新执行以下认证矩阵：
+Each time a sub-library releases a new version, the following certification matrix must be re-executed:
 
-| 变更来源 | 必须重测 |
-|---------|---------|
-| Core 协议变更 | L1 + L2 + L3（全实现） |
-| Core 安全变更 | L4（Core + FX） |
-| FX API 变更 | L1 + L2（FX） |
-| RX 配置变更 | L1 + L2（RX） |
-| TX API 变更 | L1 + L2（TX） |
-| 新增 UCUM 单位 | Suite A + Suite F 增量 |
+| Change source | Must re-test |
+|---------------|-------------|
+| Core protocol change | L1 + L2 + L3 (all implementations) |
+| Core security change | L4 (Core + FX) |
+| FX API change | L1 + L2 (FX) |
+| RX config change | L1 + L2 (RX) |
+| TX API change | L1 + L2 (TX) |
+| New UCUM units added | Suite A + Suite F incremental |
 
-### 9.2 认证有效性
+### 9.2 Certification Validity
 
-| 认证等级 | 有效期 | 续期条件 |
-|---------|--------|---------|
-| L1 | 永久（不变算法） | 代码变更时自动 CI 重测 |
-| L2 | 直至任一实现版本变更 | 跨实现帧交换重测 |
-| L3 | Core 融合参数变更时 | 策略序列重测 |
-| L4 | 安全模块变更时 | 全 43 项安全测试重测 |
-| L5 | 每季度（或重大变更时） | 完整穷举套件 |
+| Certification level | Valid until | Renewal condition |
+|--------------------|-------------|------------------|
+| L1 | Permanent (invariant algorithms) | Automatic CI re-test on code change |
+| L2 | Until any implementation version changes | Cross-impl frame exchange re-test |
+| L3 | When Core fusion parameters change | Strategy sequence re-test |
+| L4 | When security module changes | Full 43-item security test re-run |
+| L5 | Quarterly (or on major changes) | Full exhaustive suite |
 
-### 9.3 认证撤销条件
+### 9.3 Certification Revocation Conditions
 
-- 任何 L1 测试失败 → 全部认证立即撤销
-- L2 跨实现测试失败 → L2 及以上撤销
-- 安全漏洞发现 → L4 + L5 撤销直至修复
+- Any L1 test fails → all certifications immediately revoked
+- L2 cross-implementation test fails → L2 and above revoked
+- Security vulnerability discovered → L4 + L5 revoked until fixed
 
 ---
 
-## 10. 认证报告模板
+## 10. Certification Report Templates
 
-### 10.1 L1 认证报告
+### 10.1 L1 Certification Report
 
 ```
 ═══════════════════════════════════════════════════════════
-  OpenSynaptic L1 Wire Compatible 认证报告
+  OpenSynaptic L1 Wire Compatible Certification Report
 ═══════════════════════════════════════════════════════════
 
-  被测实现：[实现名称]
-  版本：[版本号]
-  测试日期：[YYYY-MM-DD]
-  测试环境：[OS / 编译器 / 平台]
-  参考实现：OpenSynaptic Core v1.3.1
+  Implementation under test: [implementation name]
+  Version: [version string]
+  Test date: [YYYY-MM-DD]
+  Test environment: [OS / compiler / platform]
+  Reference implementation: OpenSynaptic Core v1.3.1
 
   ─────────────────────────────────────────────────────────
-  测试结果
+  Test Results
 
-  CRC-8/SMBUS 参考向量
-    L1-CRC8-01  标准检验 (0xF4)         [PASS/FAIL]
-    L1-CRC8-02  单字节 (0x07)           [PASS/FAIL]
-    L1-CRC8-03  空输入安全性             [PASS/FAIL]
+  CRC-8/SMBUS Reference Vectors
+    L1-CRC8-01  Standard check (0xF4)              [PASS/FAIL]
+    L1-CRC8-02  Single byte (0x07)                 [PASS/FAIL]
+    L1-CRC8-03  Empty input safety                 [PASS/FAIL]
 
-  CRC-16/CCITT-FALSE 参考向量
-    L1-CRC16-01 标准检验 (0x29B1)       [PASS/FAIL]
-    L1-CRC16-02 单字节 0x00 (0xE1F0)    [PASS/FAIL]
-    L1-CRC16-03 单字节 0xFF (0xFF00)    [PASS/FAIL]
-    L1-CRC16-04 空输入安全性             [PASS/FAIL]
+  CRC-16/CCITT-FALSE Reference Vectors
+    L1-CRC16-01 Standard check (0x29B1)            [PASS/FAIL]
+    L1-CRC16-02 Single byte 0x00 (0xE1F0)          [PASS/FAIL]
+    L1-CRC16-03 Single byte 0xFF (0xFF00)          [PASS/FAIL]
+    L1-CRC16-04 Empty input safety                 [PASS/FAIL]
 
-  Base62 编码参考向量
-    L1-B62-01   0 → "0"                 [PASS/FAIL]
-    L1-B62-02   1 → "1"                 [PASS/FAIL]
+  Base62 Encode Reference Vectors
+    L1-B62-01   0 → "0"                            [PASS/FAIL]
+    L1-B62-02   1 → "1"                            [PASS/FAIL]
     ...
-    L1-B62-17   -123456789 → "-8m0Kx"   [PASS/FAIL/N/A]
+    L1-B62-17   -123456789 → "-8m0Kx"              [PASS/FAIL/N/A]
 
-  Base62 解码参考向量
-    L1-B62D-01  "0" → 0                 [PASS/FAIL]
+  Base62 Decode Reference Vectors
+    L1-B62D-01  "0" → 0                            [PASS/FAIL]
     ...
-    L1-B62D-06  NULL → error            [PASS/FAIL]
+    L1-B62D-06  NULL → error                       [PASS/FAIL]
 
-  帧结构验证
-    L1-FRAME-01 标准帧字节序             [PASS/FAIL]
-    L1-FRAME-02 最小帧                   [PASS/FAIL]
-    L1-FRAME-03 过短帧拒绝               [PASS/FAIL]
-    L1-FRAME-04 NULL 输入拒绝            [PASS/FAIL]
-
-  ─────────────────────────────────────────────────────────
-  汇总
-
-  通过：[N] / 34
-  失败：[N] / 34
-  N/A ：[N] / 34（不适用于该实现的测试项）
-
-  认证结论：[通过 / 未通过]
+  Frame Structure Verification
+    L1-FRAME-01 Standard frame byte order          [PASS/FAIL]
+    L1-FRAME-02 Minimum frame                      [PASS/FAIL]
+    L1-FRAME-03 Truncated frame rejection          [PASS/FAIL]
+    L1-FRAME-04 NULL input rejection               [PASS/FAIL]
 
   ─────────────────────────────────────────────────────────
-  签章
+  Summary
 
-  测试执行者：_______________
-  评审者：_______________
-  日期：_______________
+  Passed: [N] / 34
+  Failed: [N] / 34
+  N/A:    [N] / 34  (tests not applicable to this implementation)
+
+  Certification result: [PASS / FAIL]
+
+  ─────────────────────────────────────────────────────────
+  Signatures
+
+  Tester: _______________
+  Reviewer: _______________
+  Date: _______________
 ═══════════════════════════════════════════════════════════
 ```
 
-### 10.2 完整认证摘要报告
+### 10.2 Full Certification Summary Report
 
 ```
 ═══════════════════════════════════════════════════════════
-  OpenSynaptic 生态系统认证摘要
+  OpenSynaptic Ecosystem Certification Summary
 ═══════════════════════════════════════════════════════════
 
-  认证日期：[YYYY-MM-DD]
-  参考版本：Core v1.3.1
+  Certification date: [YYYY-MM-DD]
+  Reference version: Core v1.3.1
 
-  实现           L1    L2    L3    L4    L5
-  ─────────────  ───   ───   ───   ───   ───
-  Core (Python)  ✅    ✅    ✅    ✅    ✅
-  FX (C99)       ✅    ✅    ✅    ✅    N/A
-  RX (C89)       ✅    ✅    N/A   N/A   N/A
-  TX (C89)       ✅    ✅    N/A   N/A   N/A
+  Implementation      L1    L2    L3    L4    L5
+  ─────────────────   ───   ───   ───   ───   ───
+  Core (Python)        ✅    ✅    ✅    ✅    ✅
+  FX (C99)             ✅    ✅    ✅    ✅    N/A
+  RX (C89)             ✅    ✅    N/A   N/A   N/A
+  TX (C89)             ✅    ✅    N/A   N/A   N/A
 
-  跨实现互验
+  Cross-Implementation Verification
   ─────────────────────────────────────────
   TX → Core    ✅  (L2-XENC-01)
   TX → RX      ✅  (L2-XENC-02)
@@ -1133,39 +1135,39 @@ jobs:
   Core → FX    ✅  (L2-XENC-05)
   Core → RX    ✅  (L2-XENC-06)
 
-  穷举测试统计
+  Exhaustive Test Statistics
   ─────────────────────────────────────────
-  业务逻辑：  985 / 985  (SKIP 2, 已知限制)
-  安全基础：  43 / 43
-  插件系统：  205 / 205
-  正交设计：  24 / 24
+  Business logic:   985 / 985  (SKIP 2, known limitations)
+  Security infra:    43 / 43
+  Plugin system:    205 / 205
+  Orthogonal design: 24 / 24
   ─────────────────────────────────────────
-  总计：     1358 / 1358  通过率 99.85%
+  Total:  1358 / 1358  pass rate 99.85%
 
 ═══════════════════════════════════════════════════════════
 ```
 
 ---
 
-## 附录 A：测试执行命令速查
+## Appendix A: Test Execution Quick Reference
 
 ### Core (Python)
 
 ```bash
-# L1 基础算法
+# L1 core algorithms
 cd OpenSynaptic
 python -m pytest tests/unit/test_core_algorithms.py -v
 
-# L5 穷举业务逻辑
+# L5 exhaustive business logic
 python scripts/exhaustive_business_logic.py
 
-# L5 安全基础设施
+# L5 security infrastructure
 python scripts/exhaustive_security_infra_test.py
 
-# L5 插件系统
+# L5 plugin system
 python scripts/exhaustive_plugin_test.py
 
-# 集成测试
+# Integration tests
 python scripts/integration_test.py
 ```
 
@@ -1178,7 +1180,7 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-**交叉编译** (ESP32 示例)：
+**Cross-compilation** (ESP32 example):
 ```bash
 cmake -B build-esp32 \
   -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/esp32.cmake \
@@ -1193,10 +1195,10 @@ cd OSynaptic-RX
 cmake -B build -DOSRX_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=MinSizeRel
 cmake --build build
 ctest --test-dir build --output-on-failure
-# 期望输出：39 passed, 0 failed
+# Expected output: 39 passed, 0 failed
 ```
 
-**最小配置测试**：
+**Minimal configuration test**:
 ```bash
 cmake -B build-minimal \
   -DOSRX_BUILD_TESTS=ON \
@@ -1214,54 +1216,54 @@ cd OSynaptic-TX
 cmake -B build -DOSTX_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=MinSizeRel
 cmake --build build
 ctest --test-dir build --output-on-failure
-# 期望输出：50 passed, 0 failed
+# Expected output: 50 passed, 0 failed
 ```
 
 ---
 
-## 附录 B：认证工具链要求
+## Appendix B: Certification Toolchain Requirements
 
-| 工具 | 最低版本 | 用途 |
-|------|---------|------|
-| Python | 3.11 | Core 测试运行 |
-| pytest | 7.0 | 单元测试框架 |
-| CMake | 3.15 | FX/RX/TX 构建 |
-| GCC | 9.0 | C89/C99 编译 |
-| Clang | 12.0 | 可选编译器 |
-| MSVC | 2019 | Windows 构建 |
-| avr-gcc | 7.0 | AVR 交叉编译（可选） |
-| arm-none-eabi-gcc | 10.0 | Cortex-M 交叉编译（可选） |
-
----
-
-## 附录 C：认证测试唯一标识符索引
-
-| 测试 ID | 等级 | 类别 | 简述 |
-|---------|------|------|------|
-| L1-CRC8-01 | L1 | CRC | 标准检验向量 0xF4 |
-| L1-CRC8-02 | L1 | CRC | 单字节 0x07 |
-| L1-CRC8-03 | L1 | CRC | 空输入安全 |
-| L1-CRC16-01 | L1 | CRC | 标准检验向量 0x29B1 |
-| L1-CRC16-02 | L1 | CRC | 单字节 0x00 → 0xE1F0 |
-| L1-CRC16-03 | L1 | CRC | 单字节 0xFF → 0xFF00 |
-| L1-CRC16-04 | L1 | CRC | 空输入安全 |
-| L1-B62-01~17 | L1 | Base62 | 编码参考向量 |
-| L1-B62D-01~06 | L1 | Base62 | 解码参考向量 |
-| L1-FRAME-01 | L1 | 帧 | 标准帧字节序 |
-| L1-FRAME-02 | L1 | 帧 | 最小帧 |
-| L1-FRAME-03 | L1 | 帧 | 过短帧拒绝 |
-| L1-FRAME-04 | L1 | 帧 | NULL 输入 |
-| L2-XENC-01~06 | L2 | 互验 | 跨实现帧交换 |
-| L2-MULTI-01 | L2 | 互验 | 多传感器帧交换 |
-| L2-CRC-CROSS-01 | L2 | 互验 | CRC 交叉验证 |
-| L3-STRAT-01~02 | L3 | 融合 | 策略序列 |
-| L3-DIFF-01~02 | L3 | 融合 | DIFF 位掩码 |
-| L3-HEART-01 | L3 | 融合 | HEART 回放 |
-| L4-HS-01~03 | L4 | 安全 | 握手状态机 |
-| L4-TS-01~03 | L4 | 安全 | 时间戳防重放 |
-| L4-ID-01~04 | L4 | 安全 | ID 分配 |
-| L4-DISP-01~03 | L4 | 安全 | 握手分发 |
+| Tool | Minimum version | Purpose |
+|------|----------------|---------|
+| Python | 3.11 | Core test runner |
+| pytest | 7.0 | Unit test framework |
+| CMake | 3.15 | FX/RX/TX build |
+| GCC | 9.0 | C89/C99 compile |
+| Clang | 12.0 | Optional compiler |
+| MSVC | 2019 | Windows build |
+| avr-gcc | 7.0 | AVR cross-compile (optional) |
+| arm-none-eabi-gcc | 10.0 | Cortex-M cross-compile (optional) |
 
 ---
 
-*本文档由 OpenSynaptic 项目自动化认证工具生成和维护。*
+## Appendix C: Certification Test Unique Identifier Index
+
+| Test ID | Level | Category | Description |
+|---------|-------|----------|-------------|
+| L1-CRC8-01 | L1 | CRC | Standard check vector 0xF4 |
+| L1-CRC8-02 | L1 | CRC | Single byte 0x07 |
+| L1-CRC8-03 | L1 | CRC | Empty input safety |
+| L1-CRC16-01 | L1 | CRC | Standard check vector 0x29B1 |
+| L1-CRC16-02 | L1 | CRC | Single byte 0x00 → 0xE1F0 |
+| L1-CRC16-03 | L1 | CRC | Single byte 0xFF → 0xFF00 |
+| L1-CRC16-04 | L1 | CRC | Empty input safety |
+| L1-B62-01~17 | L1 | Base62 | Encode reference vectors |
+| L1-B62D-01~06 | L1 | Base62 | Decode reference vectors |
+| L1-FRAME-01 | L1 | Frame | Standard frame byte order |
+| L1-FRAME-02 | L1 | Frame | Minimum frame |
+| L1-FRAME-03 | L1 | Frame | Truncated frame rejection |
+| L1-FRAME-04 | L1 | Frame | NULL input |
+| L2-XENC-01~06 | L2 | Interop | Cross-implementation frame exchange |
+| L2-MULTI-01 | L2 | Interop | Multi-sensor frame exchange |
+| L2-CRC-CROSS-01 | L2 | Interop | CRC cross-validation |
+| L3-STRAT-01~02 | L3 | Fusion | Strategy sequences |
+| L3-DIFF-01~02 | L3 | Fusion | DIFF bit-mask |
+| L3-HEART-01 | L3 | Fusion | HEART replay |
+| L4-HS-01~03 | L4 | Security | Handshake state machine |
+| L4-TS-01~03 | L4 | Security | Timestamp anti-replay |
+| L4-ID-01~04 | L4 | Security | ID allocation |
+| L4-DISP-01~03 | L4 | Security | Handshake dispatch |
+
+---
+
+*This document is generated and maintained by the OpenSynaptic project automated certification tooling.*

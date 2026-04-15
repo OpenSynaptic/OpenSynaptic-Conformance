@@ -10,6 +10,7 @@ Expected contents include:
 - implementation alignment matrices across Core, FX, RX, and TX
 - performance and capability summaries
 
-Current document:
+Current documents:
 
-- [OpenSynaptic Technical Whitepaper](OpenSynaptic_Technical_Whitepaper.md)
+- [OpenSynaptic Technical Whitepaper](OpenSynaptic_Technical_Whitepaper.md) — English (canonical)
+- [OpenSynaptic 核心技术白皮书](OpenSynaptic_Technical_Whitepaper_zh.md) — 中文

@@ -1,37 +1,39 @@
-# OpenSynaptic 核心技术白皮书
+# OpenSynaptic Core Technical Whitepaper
 
-**版本**：1.0 · 2026-04-09  
-**适用范围**：OpenSynaptic v1.3.x / OSynaptic-FX v1.0.x / OSynaptic-RX v1.0.x / OSynaptic-TX v1.0.x  
-**分级**：公开技术文档  
+**Version**: 1.0 · 2026-04-09
+**Scope**: OpenSynaptic v1.3.x / OSynaptic-FX v1.0.x / OSynaptic-RX v1.0.x / OSynaptic-TX v1.0.x
+**Classification**: Public Technical Document
 
----
-
-## 摘要
-
-OpenSynaptic 是面向物联网传感器网络的高性能协议栈，实现 **2-N-2 拓扑**（多发送器 → 中枢 → 多接收器）架构。协议核心提供五层处理管道：标准化（UCUM）、压缩（Base62）、融合编码（FULL/DIFF/HEART）、安全传输及持久化存储。其嵌入式卫星库 **FX**（Full-eXperience 编码器）、**RX**（精简接收解码器）、**TX**（极简发送编码器）覆盖从 ATtiny25（2 KB Flash / 128 B RAM）到 ESP32（520 KB SRAM）的全谱系 MCU 平台。
-
-本白皮书定义了 OpenSynaptic 生态系统的核心协议规范、跨平台 API 合约、完整认证矩阵，以及可独立重现的验证流程。
+> 中文版 / Chinese version: [OpenSynaptic_Technical_Whitepaper_zh.md](OpenSynaptic_Technical_Whitepaper_zh.md)
 
 ---
 
-## 目录
+## Abstract
 
-1. [系统架构](#1-系统架构)
-2. [线协议规范](#2-线协议规范)
-3. [核心算法](#3-核心算法)
-4. [卫星库技术规格](#4-卫星库技术规格)
-5. [API 合约与对齐矩阵](#5-api-合约与对齐矩阵)
-6. [安全架构](#6-安全架构)
-7. [UCUM 标准化引擎](#7-ucum-标准化引擎)
-8. [性能基准](#8-性能基准)
-9. [测试与认证体系](#9-测试与认证体系)
-10. [附录](#附录)
+OpenSynaptic is a high-performance protocol stack for IoT sensor networks, implementing a **2-N-2 topology** (multiple transmitters → hub → multiple receivers). The protocol core provides a five-stage processing pipeline: standardization (UCUM), compression (Base62), fusion encoding (FULL/DIFF/HEART), secure transport, and persistent storage. Its embedded satellite libraries — **FX** (Full-eXperience encoder), **RX** (compact receive decoder), and **TX** (minimal transmit encoder) — cover the full MCU spectrum from ATtiny25 (2 KB Flash / 128 B RAM) to ESP32 (520 KB SRAM).
+
+This whitepaper defines the OpenSynaptic ecosystem's core protocol specification, cross-platform API contracts, complete certification matrix, and independently reproducible verification procedures.
 
 ---
 
-## 1. 系统架构
+## Table of Contents
 
-### 1.1 全局拓扑
+1. [System Architecture](#1-system-architecture)
+2. [Wire Protocol Specification](#2-wire-protocol-specification)
+3. [Core Algorithms](#3-core-algorithms)
+4. [Satellite Library Technical Specifications](#4-satellite-library-technical-specifications)
+5. [API Contracts and Alignment Matrices](#5-api-contracts-and-alignment-matrices)
+6. [Security Architecture](#6-security-architecture)
+7. [UCUM Standardization Engine](#7-ucum-standardization-engine)
+8. [Performance Benchmarks](#8-performance-benchmarks)
+9. [Testing and Certification System](#9-testing-and-certification-system)
+10. [Appendices](#appendices)
+
+---
+
+## 1. System Architecture
+
+### 1.1 Global Topology
 
 ```
                           ┌───────────────────────┐
@@ -60,174 +62,174 @@ OpenSynaptic 是面向物联网传感器网络的高性能协议栈，实现 **2
                           └───────────────────────┘
 ```
 
-### 1.2 编码层次与数据流
+### 1.2 Encoding Layers and Data Flow
 
-| 阶段 | 输入 | 输出 | 模块 |
-|------|------|------|------|
-| **L1 采集** | 传感器原始读数 | `[sid, state, value, unit]` 数组 | 用户应用层 |
-| **L2 标准化** | 用户单位+数值 | UCUM 规范单位+SI 基值 | `OpenSynapticStandardizer` |
-| **L3 压缩** | 标准化 Fact JSON | Base62 紧凑字符串 | `OpenSynapticEngine` |
-| **L4 融合编码** | Base62 字符串 | 二进制帧（13B 头 + 体 + 3B CRC） | `OSVisualFusionEngine` |
-| **L5 传输** | 二进制帧 | 网络/物理层投递 | `TransportManager` |
+| Stage | Input | Output | Module |
+|-------|-------|--------|--------|
+| **L1 Acquisition** | Raw sensor readings | `[sid, state, value, unit]` array | Application layer |
+| **L2 Standardization** | User unit + value | UCUM canonical unit + SI base value | `OpenSynapticStandardizer` |
+| **L3 Compression** | Standardized Fact JSON | Base62 compact string | `OpenSynapticEngine` |
+| **L4 Fusion Encoding** | Base62 string | Binary frame (13 B header + body + 3 B CRC) | `OSVisualFusionEngine` |
+| **L5 Transport** | Binary frame | Network/physical layer delivery | `TransportManager` |
 
-### 1.3 组件职责矩阵
+### 1.3 Component Responsibility Matrix
 
-| 能力 | Core (Python) | FX (C99) | RX (C89) | TX (C89) |
-|------|:---:|:---:|:---:|:---:|
-| UCUM 标准化 | ✅ 15库完整 | ✅ 50+单位 | ✖ | ✖ |
-| Base62 编码 | ✅ i64 | ✅ i64 | ✖ | ✅ i32 |
-| Base62 解码 | ✅ i64 | ✅ i64 | ✅ i32 | ✖ |
-| FULL 编码 | ✅ | ✅ | ✖ | ✅ |
-| DIFF 编码 | ✅ | ✅ | ✖ | ✖ |
-| HEART 编码 | ✅ | ✅ | ✖ | ✖ |
-| FULL 解码 | ✅ | ✅ | ✅ | ✖ |
-| DIFF 解码 | ✅ | ✅ | ✖ | ✖ |
-| HEART 解码 | ✅ | ✅ | ✖ | ✖ |
+| Capability | Core (Python) | FX (C99) | RX (C89) | TX (C89) |
+|------------|:---:|:---:|:---:|:---:|
+| UCUM standardization | ✅ 15 libs full | ✅ 50+ units | ✖ | ✖ |
+| Base62 encode | ✅ i64 | ✅ i64 | ✖ | ✅ i32 |
+| Base62 decode | ✅ i64 | ✅ i64 | ✅ i32 | ✖ |
+| FULL encode | ✅ | ✅ | ✖ | ✅ |
+| DIFF encode | ✅ | ✅ | ✖ | ✖ |
+| HEART encode | ✅ | ✅ | ✖ | ✖ |
+| FULL decode | ✅ | ✅ | ✅ | ✖ |
+| DIFF decode | ✅ | ✅ | ✖ | ✖ |
+| HEART decode | ✅ | ✅ | ✖ | ✖ |
 | CRC-8 (body) | ✅ | ✅ | ✅ | ✅ |
 | CRC-16/CCITT | ✅ | ✅ | ✅ | ✅ |
-| ID 分配 | ✅ 自适应租约 | ✅ 自适应租约 | ✖ | ✖ |
-| 安全会话 | ✅ AES-128 | ✅ XOR+TSCheck | ✖ | ✖ |
-| 握手控制面 | ✅ 14种CMD | ✅ 14种CMD | ✖ | ✖ |
-| 多传输驱动 | ✅ UDP/TCP/QUIC/UART/CAN/LoRa/BLE | ✅ 协议矩阵 | ✖ | ✖ |
-| 插件系统 | ✅ 6种插件 | ✅ 3种插件 | ✖ | ✖ |
-| 存储后端 | ✅ SQLite/MySQL/PG | ✅ LittleFS | ✖ | ✖ |
+| ID allocation | ✅ adaptive lease | ✅ adaptive lease | ✖ | ✖ |
+| Secure session | ✅ AES-128 | ✅ XOR+TSCheck | ✖ | ✖ |
+| Handshake control plane | ✅ 14 CMDs | ✅ 14 CMDs | ✖ | ✖ |
+| Multi-transport drivers | ✅ UDP/TCP/QUIC/UART/CAN/LoRa/BLE | ✅ protocol matrix | ✖ | ✖ |
+| Plugin system | ✅ 6 plugin types | ✅ 3 plugin types | ✖ | ✖ |
+| Storage backend | ✅ SQLite/MySQL/PG | ✅ LittleFS | ✖ | ✖ |
 | REST API | ✅ | ✖ | ✖ | ✖ |
 | TUI/Web UI | ✅ | ✖ | ✖ | ✖ |
 
 ---
 
-## 2. 线协议规范
+## 2. Wire Protocol Specification
 
-### 2.1 帧结构
+### 2.1 Frame Structure
 
 ```
-偏移   字段        长度   编码       说明
-────   ─────      ────   ────       ────
-[0]    cmd         1B    uint8      命令字节
-[1]    route       1B    uint8      路由计数（固定=1）
-[2-5]  aid         4B    BE uint32  发送端分配ID
-[6]    tid         1B    uint8      模板/事务ID
-[7-12] timestamp   6B    BE uint48  Unix时间戳（秒或毫秒）
-[13..N] body       var   ASCII/B62  有效载荷
-[N+1]  crc8        1B    uint8      CRC-8(body)
-[N+2..N+3] crc16   2B    BE uint16  CRC-16(全帧[0..N+1])
+Offset  Field       Len    Encoding    Description
+──────  ─────       ───    ────────    ───────────
+[0]     cmd         1 B    uint8       Command byte
+[1]     route       1 B    uint8       Route count (fixed = 1)
+[2-5]   aid         4 B    BE uint32   Sender assigned ID
+[6]     tid         1 B    uint8       Template/transaction ID
+[7-12]  timestamp   6 B    BE uint48   Unix timestamp (seconds or milliseconds)
+[13..N] body        var    ASCII/B62   Payload
+[N+1]   crc8        1 B    uint8       CRC-8(body)
+[N+2..N+3] crc16    2 B    BE uint16   CRC-16(full frame [0..N+1])
 ```
 
-**最小帧**：16 字节（空 body + CRC）  
-**最大帧**：由 `PACKET_MAX` 决定（默认 96B RX / 256B FX / 无限 Core）
+**Minimum frame**: 16 bytes (empty body + CRC)  
+**Maximum frame**: determined by `PACKET_MAX` (default 96 B for RX / 256 B for FX / unlimited for Core)
 
-### 2.2 命令字节定义
+### 2.2 Command Byte Definitions
 
-#### 数据命令（6种）
+#### Data Commands (6 types)
 
-| 字节值 | 符号 | 说明 |
-|--------|------|------|
-| `0x3F` (63) | `DATA_FULL` | 完整字段帧（明文） |
-| `0x40` (64) | `DATA_FULL_SEC` | 完整字段帧（加密） |
-| `0xAA` (170) | `DATA_DIFF` | 增量更新帧（明文） |
-| `0xAB` (171) | `DATA_DIFF_SEC` | 增量更新帧（加密） |
-| `0x7F` (127) | `DATA_HEART` | 心跳帧（明文） |
-| `0x80` (128) | `DATA_HEART_SEC` | 心跳帧（加密） |
+| Byte Value | Symbol | Description |
+|------------|--------|-------------|
+| `0x3F` (63) | `DATA_FULL` | Full-field frame (plaintext) |
+| `0x40` (64) | `DATA_FULL_SEC` | Full-field frame (encrypted) |
+| `0xAA` (170) | `DATA_DIFF` | Incremental update frame (plaintext) |
+| `0xAB` (171) | `DATA_DIFF_SEC` | Incremental update frame (encrypted) |
+| `0x7F` (127) | `DATA_HEART` | Heartbeat frame (plaintext) |
+| `0x80` (128) | `DATA_HEART_SEC` | Heartbeat frame (encrypted) |
 
-#### 控制命令（12种）
+#### Control Commands (12 types)
 
-| 字节值 | 符号 | 方向 | 说明 |
-|--------|------|------|------|
-| 1 | `ID_REQUEST` | C→S | 请求分配 AID |
-| 2 | `ID_ASSIGN` | S→C | 分配 AID + 时间戳 |
-| 3 | `ID_POOL_REQ` | GW→S | 批量 ID 请求 |
-| 4 | `ID_POOL_RES` | S→GW | 批量 ID 响应 |
-| 5 | `HANDSHAKE_ACK` | S→C | 握手确认 |
-| 6 | `HANDSHAKE_NACK` | S→C | 握手拒绝 |
-| 9 | `PING` | 双向 | 心跳探测 |
-| 10 | `PONG` | 双向 | 心跳响应 |
-| 11 | `TIME_REQUEST` | C→S | 时间同步请求 |
-| 12 | `TIME_RESPONSE` | S→C | 时间同步响应 |
-| 13 | `SECURE_DICT_READY` | C→S | 安全字典就绪 |
-| 14 | `SECURE_CHANNEL_ACK` | S→C | 安全通道确认 |
+| Byte Value | Symbol | Direction | Description |
+|------------|--------|-----------|-------------|
+| 1 | `ID_REQUEST` | C→S | Request AID allocation |
+| 2 | `ID_ASSIGN` | S→C | Assign AID + timestamp |
+| 3 | `ID_POOL_REQ` | GW→S | Bulk ID request |
+| 4 | `ID_POOL_RES` | S→GW | Bulk ID response |
+| 5 | `HANDSHAKE_ACK` | S→C | Handshake confirmed |
+| 6 | `HANDSHAKE_NACK` | S→C | Handshake rejected |
+| 9 | `PING` | bidirectional | Keepalive probe |
+| 10 | `PONG` | bidirectional | Keepalive response |
+| 11 | `TIME_REQUEST` | C→S | Time sync request |
+| 12 | `TIME_RESPONSE` | S→C | Time sync response |
+| 13 | `SECURE_DICT_READY` | C→S | Secure dictionary ready |
+| 14 | `SECURE_CHANNEL_ACK` | S→C | Secure channel confirmed |
 
-### 2.3 FULL 数据体格式
+### 2.3 FULL Body Format
 
-模板语法（管道分隔）：
+Template syntax (pipe-delimited):
 ```
 {NodeID}.{NodeState}.{TS_B64}|{SID}>U.{UnitCode}:{B62Value}|...
 ```
 
-**字段说明**：
-- `NodeID`：节点标识（≤31字符）
-- `NodeState`：设备状态码（`U`=ONLINE, 每种状态1字符映射）
-- `TS_B64`：6字节时间戳的 Base64url 编码（8字符，无填充）
-- `SID`：传感器标识（≤8字符）
-- `UnitCode`：OS_Symbols.json 定义的3位符号码（如 `A01`=Cel）
-- `B62Value`：Base62 编码的缩放整数值（`value × 10000`）
+**Field descriptions**:
+- `NodeID`: node identifier (≤ 31 characters)
+- `NodeState`: device status code (`U` = ONLINE, 1 character per state)
+- `TS_B64`: 6-byte timestamp encoded as Base64url (8 characters, no padding)
+- `SID`: sensor identifier (≤ 8 characters)
+- `UnitCode`: 3-digit symbol code defined in `OS_Symbols.json` (e.g. `A01` = Cel)
+- `B62Value`: Base62-encoded scaled integer (`value × 10000`)
 
-**示例**：
+**Example**:
 ```
 NODE01.U.AAAAABI0|TEMP>U.A01:TVK|HUM>U.C00:1rq|
 ```
 
-### 2.4 DIFF 数据体格式
+### 2.4 DIFF Body Format
 
 ```
-偏移       字段           说明
-────       ─────         ────
-[0..K]     TS_B64        更新后的时间戳
-[K+1]      bitmask       位掩码（第i位=1表示第i通道有变化）
-[K+2..]    changed[]     变化字段序列：[len:1B][b62_value:varB]
+Offset        Field           Description
+──────        ─────           ───────────
+[0..K]        TS_B64          Updated timestamp
+[K+1]         bitmask         Bit mask (bit i = 1 means channel i has changed)
+[K+2..]       changed[]       Changed field sequence: [len:1B][b62_value:varB]
 ```
 
-**压缩比**：相对 FULL 节省 70-80%
+**Compression ratio**: 70–80% savings relative to FULL
 
-### 2.5 HEART 数据体格式
+### 2.5 HEART Body Format
 
 ```
-[0..K]     TS_B64        仅更新时间戳，其余字段回放缓存模板
+[0..K]        TS_B64          Timestamp update only; remaining fields replayed from cached template
 ```
 
-### 2.6 CRC 校验规范
+### 2.6 CRC Verification Specification
 
-| 算法 | 多项式 | 初始值 | 校验范围 | 参考向量 |
-|------|--------|--------|----------|----------|
+| Algorithm | Polynomial | Initial Value | Scope | Reference Vector |
+|-----------|------------|---------------|-------|------------------|
 | CRC-8/SMBUS | `0x07` | `0x00` | body only | `"123456789"` → `0xF4` |
-| CRC-16/CCITT-FALSE | `0x1021` | `0xFFFF` | 全帧 `[0..crc8]` | `"123456789"` → `0x29B1` |
+| CRC-16/CCITT-FALSE | `0x1021` | `0xFFFF` | full frame `[0..crc8]` | `"123456789"` → `0x29B1` |
 
-### 2.7 策略选择算法
+### 2.7 Strategy Selection Algorithm
 
 ```
 function select_strategy(aid, sensor_config):
     entry = fusion_registry.lookup(aid)
-    
+
     if entry is None OR entry.sensor_config ≠ sensor_config:
         entry = fusion_registry.learn(aid, sensor_config)
         entry.sync_count = 0
         return FULL
-    
+
     entry.sync_count += 1
-    
+
     if entry.sync_count ≤ target_sync_count:    // default = 3
         return FULL
-    
+
     if all_values_unchanged(entry):
         return HEART
-    
+
     return DIFF
 ```
 
 ---
 
-## 3. 核心算法
+## 3. Core Algorithms
 
-### 3.1 Base62 编解码
+### 3.1 Base62 Encode/Decode
 
-**字符集**：`0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`（索引 0-61）
+**Character set**: `0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` (indices 0–61)
 
-**编码算法**（i64 → string）：
+**Encoding algorithm** (i64 → string):
 ```
-输入：有符号 64 位整数 v
-输出：Base62 字符串 s
+Input:  signed 64-bit integer v
+Output: Base62 string s
 
-1. 若 v < 0：输出 '-'，v = |v|
-2. 若 v == 0：输出 "0"，返回
+1. If v < 0: output '-', v = |v|
+2. If v == 0: output "0", return
 3. digits = []
 4. while v > 0:
        digits.append(CHARSET[v % 62])
@@ -235,16 +237,16 @@ function select_strategy(aid, sensor_config):
 5. s = reverse(digits)
 ```
 
-**编码范围**：
-- Core (Python)：±9.22×10¹⁸（int64）
-- FX (C99)：±4.61×10¹⁸（int64，63位符号量级）
-- TX/RX (C89)：±2.15×10⁹（int32）
+**Encoding range**:
+- Core (Python): ±9.22×10¹⁸ (int64)
+- FX (C99): ±4.61×10¹⁸ (int64, 63-bit signed magnitude)
+- TX/RX (C89): ±2.15×10⁹ (int32)
 
-**精度缩放**：`scaled_value = round(real_value × SCALE_FACTOR)`
-- SCALE_FACTOR = 10000（Core + FX + TX + RX 统一）
-- 有效精度 = 4 位小数
+**Precision scaling**: `scaled_value = round(real_value × SCALE_FACTOR)`
+- SCALE_FACTOR = 10000 (unified across Core, FX, TX, and RX)
+- Effective precision = 4 decimal places
 
-### 3.2 CRC-8 位循环实现
+### 3.2 CRC-8 Bit-Loop Implementation
 
 ```c
 uint8_t crc8(const uint8_t* data, size_t len, uint16_t poly, uint8_t init) {
@@ -259,9 +261,9 @@ uint8_t crc8(const uint8_t* data, size_t len, uint16_t poly, uint8_t init) {
 }
 ```
 
-**Flash 成本**：~72 B（无查找表，适合 ATtiny 级 MCU）
+**Flash cost**: ~72 B (no lookup table, suitable for ATtiny-class MCUs)
 
-### 3.3 CRC-16/CCITT 位循环实现
+### 3.3 CRC-16/CCITT Bit-Loop Implementation
 
 ```c
 uint16_t crc16(const uint8_t* data, size_t len, uint16_t poly, uint16_t init) {
@@ -276,140 +278,140 @@ uint16_t crc16(const uint8_t* data, size_t len, uint16_t poly, uint16_t init) {
 }
 ```
 
-### 3.4 Base64url 时间戳编码
+### 3.4 Base64url Timestamp Encoding
 
-将 48 位 Unix 时间戳编码为 8 字符 Base64url 字符串（无填充）。
+Encodes a 48-bit Unix timestamp as an 8-character Base64url string (no padding).
 
-字符集：`A-Z a-z 0-9 - _`（RFC 4648 §5）
+Character set: `A-Z a-z 0-9 - _` (RFC 4648 §5)
 
-### 3.5 融合状态机
+### 3.5 Fusion State Machine
 
 ```
                     ┌──────────────┐
                     │   UNKNOWN    │
-                    │ (无模板缓存) │
+                    │ (no template)│
                     └──────┬───────┘
-                           │ 首次 FULL 包
+                           │ first FULL packet
                            ▼
                     ┌──────────────┐
-                    │   LEARNING   │◀──── 配置变更
+                    │   LEARNING   │◀──── config change
                     │ sync_count<N │
                     └──────┬───────┘
                            │ sync_count ≥ N
                            ▼
               ┌────────────────────────┐
               │       TRACKING         │
-              │ 模板已学习，差异追踪    │
+              │ template learned       │
               └───────┬────────┬───────┘
                       │        │
-        值有变化       │        │  所有值相同
+        values changed│        │all values unchanged
                       ▼        ▼
                ┌──────────┐ ┌──────────┐
                │   DIFF   │ │  HEART   │
-               │ 增量编码  │ │ 仅时间戳  │
+               │ delta enc│ │ ts only  │
                └──────────┘ └──────────┘
 ```
 
 ---
 
-## 4. 卫星库技术规格
+## 4. Satellite Library Technical Specifications
 
-### 4.1 OSynaptic-FX（Full-eXperience 嵌入式编码器）
+### 4.1 OSynaptic-FX (Full-eXperience Embedded Encoder)
 
-| 属性 | 规格 |
-|------|------|
-| **语言标准** | C99（无 C++ 依赖） |
-| **目标平台** | ESP32, STM32, RP2040, RISC-V, AVR, Cortex-M, Linux |
-| **默认 RAM** | ~27 KB DRAM（ESP32 完整配置） |
-| **源代码** | 28 个 C 文件 + 3000 行生成数据 ≈ 11,500 LOC |
-| **分层架构** | Easy API → Core Facade → Fusion Engine → Protocol Core → Security → Runtime |
-| **传输驱动** | UDP / TCP / UART / CAN，协议矩阵自动选择 |
-| **存储后端** | 可插拔：默认 FILE_IO / LittleFS / 自定义 |
-| **Arduino 支持** | Library Manager 一键安装 |
-| **CMake 构建** | 9种架构预设 × 3种编译器 |
+| Property | Specification |
+|----------|---------------|
+| **Language standard** | C99 (no C++ dependency) |
+| **Target platforms** | ESP32, STM32, RP2040, RISC-V, AVR, Cortex-M, Linux |
+| **Default RAM** | ~27 KB DRAM (ESP32 full config) |
+| **Source code** | 28 C files + 3000 lines generated data ≈ 11,500 LOC |
+| **Layered architecture** | Easy API → Core Facade → Fusion Engine → Protocol Core → Security → Runtime |
+| **Transport drivers** | UDP / TCP / UART / CAN with protocol-matrix auto-selection |
+| **Storage backend** | Pluggable: default FILE_IO / LittleFS / custom |
+| **Arduino support** | One-click install via Library Manager |
+| **CMake build** | 9 architecture presets × 3 compilers |
 
-**关键能力**：
-- 完整 FULL → DIFF → HEART 自动策略
-- 结构签名匹配（`sig_base` + `tag_names`）
-- 安全会话状态机（INIT/PLAINTEXT_SENT/DICT_READY/SECURE）
-- 时间戳单调性检测（防重放）
-- 71 种设备操作码（TID 0x0E00-0x0E46）
-- 插件系统（Transport / Test / PortForwarder）
+**Key capabilities**:
+- Full automatic FULL → DIFF → HEART strategy
+- Structural signature matching (`sig_base` + `tag_names`)
+- Security session state machine (INIT/PLAINTEXT_SENT/DICT_READY/SECURE)
+- Timestamp monotonicity detection (anti-replay)
+- 71 device operation codes (TID 0x0E00–0x0E46)
+- Plugin system (Transport / Test / PortForwarder)
 
-**API 层级**：
+**API levels**:
 
-| 层级 | 入口函数 | 适用场景 |
-|------|---------|---------|
-| Easy | `osfx_easy_encode_multi_sensor_auto()` | Arduino 快速上手 |
-| Core | `osfx_core_encode_multi_sensor_packet_auto()` | 精细控制 |
-| Fusion | `osfx_fusion_encode()` | 自定义层接入 |
-| Packet | `osfx_packet_encode_full()` | 直接线级操作 |
+| Level | Entry function | Use case |
+|-------|----------------|----------|
+| Easy | `osfx_easy_encode_multi_sensor_auto()` | Arduino quick-start |
+| Core | `osfx_core_encode_multi_sensor_packet_auto()` | Fine-grained control |
+| Fusion | `osfx_fusion_encode()` | Custom layer integration |
+| Packet | `osfx_packet_encode_full()` | Direct wire-level access |
 
-### 4.2 OSynaptic-RX（精简接收解码器）
+### 4.2 OSynaptic-RX (Compact Receive Decoder)
 
-| 属性 | 规格 |
-|------|------|
-| **语言标准** | C89（avr-gcc / SDCC / IAR / XC8 兼容） |
-| **目标平台** | AVR ATtiny/ATmega, 8051, PIC, STM8, ESP, Cortex-M |
-| **零堆分配** | 全部栈/静态分配 |
-| **零浮点** | 定点缩放整数（÷10000） |
-| **Flash 占用** | 310 B（最小）~ 616 B（完整） |
-| **RAM 占用** | 0 B（直接解码）~ 102 B（流式解析器） |
-| **栈峰值** | 41 B（直接）/ 55 B（流式） |
-| **源代码** | 14 个文件 ≈ 650 LOC |
+| Property | Specification |
+|----------|---------------|
+| **Language standard** | C89 (avr-gcc / SDCC / IAR / XC8 compatible) |
+| **Target platforms** | AVR ATtiny/ATmega, 8051, PIC, STM8, ESP, Cortex-M |
+| **Zero heap** | All stack/static allocation |
+| **Zero float** | Fixed-point scaled integers (÷10000) |
+| **Flash footprint** | 310 B (minimal) ~ 616 B (full) |
+| **RAM footprint** | 0 B (direct decode) ~ 102 B (streaming parser) |
+| **Peak stack** | 41 B (direct) / 55 B (streaming) |
+| **Source code** | 14 files ≈ 650 LOC |
 
-**双解码路径**：
+**Dual decode paths**:
 
-| 路径 | API | 适用场景 | 额外 RAM |
-|------|-----|---------|---------|
-| 流式 | `osrx_feed_byte()` + `osrx_feed_done()` | UART / RS-485 | 102 B（OSRXParser） |
-| 直接 | `osrx_sensor_recv()` | UDP / LoRa / SPI | 0 B |
+| Path | API | Use case | Extra RAM |
+|------|-----|----------|-----------|
+| Streaming | `osrx_feed_byte()` + `osrx_feed_done()` | UART / RS-485 | 102 B (OSRXParser) |
+| Direct | `osrx_sensor_recv()` | UDP / LoRa / SPI | 0 B |
 
-**配置预设**：
+**Configuration presets**:
 
-| 等级 | RAM 范围 | 典型 MCU | 推荐配置 |
-|------|---------|---------|---------|
-| Ultra | 64-128 B | ATtiny25 | `NO_PARSER=1 NO_TIMESTAMP=1 CRC8=0 CRC16=0` |
-| Tight | 128-512 B | ATtiny85, ATmega48 | `NO_PARSER=1` |
-| Standard | 512 B-2 KB | ATmega328P | 默认配置 |
-| Comfort | ≥2 KB | ESP32, STM32F4 | 全功能 |
+| Tier | RAM range | Typical MCU | Recommended config |
+|------|-----------|-------------|-------------------|
+| Ultra | 64–128 B | ATtiny25 | `NO_PARSER=1 NO_TIMESTAMP=1 CRC8=0 CRC16=0` |
+| Tight | 128–512 B | ATtiny85, ATmega48 | `NO_PARSER=1` |
+| Standard | 512 B–2 KB | ATmega328P | Default |
+| Comfort | ≥ 2 KB | ESP32, STM32F4 | Full feature |
 
-### 4.3 OSynaptic-TX（极简发送编码器）
+### 4.3 OSynaptic-TX (Minimal Transmit Encoder)
 
-| 属性 | 规格 |
-|------|------|
-| **语言标准** | C89 |
-| **目标平台** | ATtiny25 ~ ESP32 全覆盖 |
-| **最小 Flash** | 2 KB（API C 单独） |
-| **最小 RAM** | 0 B（API C 流式） |
-| **最小栈** | 21 B（API C） |
-| **源代码** | 6 个 C 文件 ≈ 600 LOC |
-| **单位库** | 80+ UCUM 编译时验证宏 |
+| Property | Specification |
+|----------|---------------|
+| **Language standard** | C89 |
+| **Target platforms** | ATtiny25 through ESP32 full range |
+| **Minimum Flash** | 2 KB (API C standalone) |
+| **Minimum RAM** | 0 B (API C streaming) |
+| **Minimum stack** | 21 B (API C) |
+| **Source code** | 6 C files ≈ 600 LOC |
+| **Unit library** | 80+ UCUM compile-time validation macros |
 
-**三档 API**：
+**Three API tiers**:
 
-| API | 名称 | 栈峰值 | 静态 RAM | Flash | 特点 |
-|-----|------|--------|---------|-------|------|
-| **A** | 动态 | ~137 B | 96 B | ~600 B | 运行时 sensor_id / unit |
-| **B** | 静态 | ~51 B | 96 B | ~430 B | 编译时模板 `OSTX_STATIC_DEFINE` |
-| **C** | 流式 | **21 B** | **0 B** | ~760 B | 零缓冲 `ostx_stream_pack()` |
+| API | Name | Peak stack | Static RAM | Flash | Notes |
+|-----|------|------------|-----------|-------|-------|
+| **A** | Dynamic | ~137 B | 96 B | ~600 B | Runtime sensor_id / unit |
+| **B** | Static | ~51 B | 96 B | ~430 B | Compile-time template `OSTX_STATIC_DEFINE` |
+| **C** | Streaming | **21 B** | **0 B** | ~760 B | Zero-buffer `ostx_stream_pack()` |
 
-**编译时单位验证**：
+**Compile-time unit validation**:
 ```c
-OSTX_UNIT(Cel)      // → "A01" ✓ 编译通过
-OSTX_UNIT(Celsius)  // → 未定义宏 → 编译错误 ✗
+OSTX_UNIT(Cel)      // → "A01" ✓ compiles
+OSTX_UNIT(Celsius)  // → undefined macro → compile error ✗
 ```
 
 ---
 
-## 5. API 合约与对齐矩阵
+## 5. API Contracts and Alignment Matrices
 
-### 5.1 线协议一致性合约
+### 5.1 Wire Protocol Consistency Contract
 
-以下字段在所有实现中 **必须** 位级一致：
+The following fields **must** be bit-for-bit identical across all implementations:
 
-| 合约编号 | 字段 | 偏移 | 编码 | Core | FX | RX | TX |
-|---------|------|------|------|:----:|:--:|:--:|:--:|
+| Contract ID | Field | Offset | Encoding | Core | FX | RX | TX |
+|-------------|-------|--------|----------|:----:|:--:|:--:|:--:|
 | W-01 | cmd | [0] | uint8 | ✅ | ✅ | ✅ | ✅ |
 | W-02 | route | [1] | uint8 = 1 | ✅ | ✅ | ✅ | ✅ |
 | W-03 | aid | [2-5] | BE uint32 | ✅ | ✅ | ✅ | ✅ |
@@ -419,30 +421,30 @@ OSTX_UNIT(Celsius)  // → 未定义宏 → 编译错误 ✗
 | W-07 | crc8 | [N+1] | CRC-8/SMBUS | ✅ | ✅ | ✅ | ✅ |
 | W-08 | crc16 | [N+2..N+3] | CRC-16/CCITT BE | ✅ | ✅ | ✅ | ✅ |
 
-¹ RX 仅暴露低 32 位（`ts_sec`），可配置关闭  
-² TX 上 2 字节固定为 0，有效范围 uint32
+¹ RX exposes only the lower 32 bits (`ts_sec`); can be disabled via config  
+² TX holds the upper 2 bytes fixed at 0; effective range is uint32
 
-### 5.2 CRC 参考向量合约
+### 5.2 CRC Reference Vector Contracts
 
-| 合约编号 | 算法 | 输入 | 期望输出 | Core | FX | RX | TX |
-|---------|------|------|----------|:----:|:--:|:--:|:--:|
+| Contract ID | Algorithm | Input | Expected Output | Core | FX | RX | TX |
+|-------------|-----------|-------|----------------|:----:|:--:|:--:|:--:|
 | C-01 | CRC-8/SMBUS | `"123456789"` | `0xF4` | ✅ | ✅ | ✅ | ✅ |
 | C-02 | CRC-16/CCITT | `"123456789"` | `0x29B1` | ✅ | ✅ | ✅ | ✅ |
 
-### 5.3 Base62 编解码合约
+### 5.3 Base62 Encode/Decode Contracts
 
-| 合约编号 | 输入值 | 编码输出 | Core | FX | TX(enc) | RX(dec) |
-|---------|--------|---------|:----:|:--:|:------:|:------:|
+| Contract ID | Input | Encoded Output | Core | FX | TX(enc) | RX(dec) |
+|-------------|-------|---------------|:----:|:--:|:------:|:------:|
 | B-01 | 0 | `"0"` | ✅ | ✅ | ✅ | ✅ |
 | B-02 | 62 | `"10"` | ✅ | ✅ | ✅ | ✅ |
 | B-03 | -1 | `"-1"` | ✅ | ✅ | ✅ | ✅ |
 | B-04 | 215000 | `"TVK"` | ✅ | ✅ | ✅ | ✅ |
 | B-05 | -123456789 | `"-8m0Kx"` | ✅ | ✅ | N/A | N/A |
 
-### 5.4 命令字节合约
+### 5.4 Command Byte Contracts
 
-| 合约编号 | 命名 | 值 | Core | FX | RX | TX |
-|---------|------|---|:----:|:--:|:--:|:--:|
+| Contract ID | Name | Value | Core | FX | RX | TX |
+|-------------|------|-------|:----:|:--:|:--:|:--:|
 | CMD-01 | DATA_FULL | 63 | ✅ | ✅ | ✅ | ✅ |
 | CMD-02 | DATA_FULL_SEC | 64 | ✅ | ✅ | — | — |
 | CMD-03 | DATA_DIFF | 170 | ✅ | ✅ | — | — |
@@ -456,35 +458,35 @@ OSTX_UNIT(Celsius)  // → 未定义宏 → 编译错误 ✗
 | CMD-11 | TIME_REQUEST | 11 | ✅ | ✅ | — | — |
 | CMD-12 | TIME_RESPONSE | 12 | ✅ | ✅ | — | — |
 
-### 5.5 单位符号码合约
+### 5.5 Unit Symbol Code Contracts
 
-所有实现 **必须** 使用 `OS_Symbols.json` 定义的相同映射码：
+All implementations **must** use the same mapping codes defined in `OS_Symbols.json`:
 
-| 合约编号 | 单位 | 符号码 | Core | FX | RX | TX |
-|---------|------|--------|:----:|:--:|:--:|:--:|
-| U-01 | K (开尔文) | `A00` | ✅ | ✅ | ✅ | ✅ |
-| U-02 | Cel (摄氏度) | `A01` | ✅ | ✅ | ✅ | ✅ |
-| U-03 | degF (华氏度) | `A02` | ✅ | ✅ | ✅ | ✅ |
-| U-04 | Pa (帕斯卡) | `900` | ✅ | ✅ | ✅ | ✅ |
-| U-05 | % (百分比) | `C00` | ✅ | ✅ | ✅ | ✅ |
-| U-06 | m (米) | `600` | ✅ | ✅ | ✅ | ✅ |
-| U-07 | Hz (赫兹) | `400` | ✅ | ✅ | ✅ | ✅ |
-| U-08 | V (伏特) | `200` | ✅ | ✅ | ✅ | ✅ |
+| Contract ID | Unit | Symbol Code | Core | FX | RX | TX |
+|-------------|------|-------------|:----:|:--:|:--:|:--:|
+| U-01 | K (Kelvin) | `A00` | ✅ | ✅ | ✅ | ✅ |
+| U-02 | Cel (Celsius) | `A01` | ✅ | ✅ | ✅ | ✅ |
+| U-03 | degF (Fahrenheit) | `A02` | ✅ | ✅ | ✅ | ✅ |
+| U-04 | Pa (Pascal) | `900` | ✅ | ✅ | ✅ | ✅ |
+| U-05 | % (percent) | `C00` | ✅ | ✅ | ✅ | ✅ |
+| U-06 | m (metre) | `600` | ✅ | ✅ | ✅ | ✅ |
+| U-07 | Hz (hertz) | `400` | ✅ | ✅ | ✅ | ✅ |
+| U-08 | V (volt) | `200` | ✅ | ✅ | ✅ | ✅ |
 
-### 5.6 缩放因子合约
+### 5.6 Scale Factor Contracts
 
-| 合约编号 | 参数 | 值 | 说明 |
-|---------|------|---|------|
-| S-01 | `VALUE_SCALE` | 10000 | 所有实现统一 |
-| S-02 | 精度 | 4位小数 | `21.5°C → 215000` |
-| S-03 | 编码范围 (i32) | ±214748.3647 | TX/RX 限制 |
-| S-04 | 编码范围 (i64) | ±9.22×10¹⁴ | Core/FX 限制 |
+| Contract ID | Parameter | Value | Description |
+|-------------|-----------|-------|-------------|
+| S-01 | `VALUE_SCALE` | 10000 | Unified across all implementations |
+| S-02 | Precision | 4 decimal places | `21.5°C → 215000` |
+| S-03 | Encoding range (i32) | ±214748.3647 | TX/RX limit |
+| S-04 | Encoding range (i64) | ±9.22×10¹⁴ | Core/FX limit |
 
 ---
 
-## 6. 安全架构
+## 6. Security Architecture
 
-### 6.1 安全会话状态机
+### 6.1 Secure Session State Machine
 
 ```
       ┌────────────────────────────────────────────────────────┐
@@ -504,52 +506,52 @@ OSTX_UNIT(Celsius)  // → 未定义宏 → 编译错误 ✗
       └────────────────────────────────────────────────────────┘
 ```
 
-### 6.2 时间戳防重放
+### 6.2 Timestamp Anti-Replay
 
-| 检查结果 | 条件 | 动作 |
-|---------|------|------|
-| `TS_ACCEPT` | `ts > last_data_timestamp` | 更新 `last_data_timestamp`，放行 |
-| `TS_REPLAY` | `ts == last_data_timestamp` | 拒绝，记录告警 |
-| `TS_OUT_OF_ORDER` | `ts < last_data_timestamp` | 拒绝，记录告警 |
+| Result | Condition | Action |
+|--------|-----------|--------|
+| `TS_ACCEPT` | `ts > last_data_timestamp` | Update `last_data_timestamp`, accept |
+| `TS_REPLAY` | `ts == last_data_timestamp` | Reject, log warning |
+| `TS_OUT_OF_ORDER` | `ts < last_data_timestamp` | Reject, log warning |
 
-### 6.3 握手分发拒绝原因
+### 6.3 Handshake Dispatch Rejection Reasons
 
-| 原因码 | 说明 |
-|--------|------|
-| `MALFORMED` | 帧结构不完整 |
-| `CRC` | CRC-8 或 CRC-16 校验失败 |
-| `REPLAY` | 时间戳重放检测 |
-| `OUT_OF_ORDER` | 时间戳乱序 |
-| `NO_SESSION` | 无已建立的安全会话 |
-| `UNSUPPORTED` | 未知命令类型 |
+| Reason Code | Description |
+|-------------|-------------|
+| `MALFORMED` | Incomplete frame structure |
+| `CRC` | CRC-8 or CRC-16 verification failed |
+| `REPLAY` | Timestamp replay detected |
+| `OUT_OF_ORDER` | Timestamp out-of-order |
+| `NO_SESSION` | No established secure session |
+| `UNSUPPORTED` | Unknown command type |
 
 ---
 
-## 7. UCUM 标准化引擎
+## 7. UCUM Standardization Engine
 
-### 7.1 支持的单位库（15类）
+### 7.1 Supported Unit Libraries (15 categories)
 
-| 类别 | 基础单位 | 派生单位示例 |
-|------|---------|-------------|
-| 温度 | K | Cel, degF, degRe |
-| 压力 | Pa | bar, psi, mmHg, atm |
-| 长度 | m | in, ft, yd, mi, AU |
-| 质量 | g | lb, oz, t, u |
-| 时间 | s | min, h, d, wk |
-| 电流 | A | — |
-| 频率 | Hz | rpm, deg/s, rad/s |
-| 能量/功率 | W, J | cal, hp |
-| 电压/阻抗 | V, Ω, F | — |
-| 湿度 | % | — |
-| 信息学 | bit, By | Bd |
-| 物质量 | mol | eq, osm |
-| 发光强度 | cd | cp, hk |
-| 设备操作 | cmd | pow_on, pow_off, mv_up, mv_dn, ... |
+| Category | Base unit | Derived unit examples |
+|----------|-----------|----------------------|
+| Temperature | K | Cel, degF, degRe |
+| Pressure | Pa | bar, psi, mmHg, atm |
+| Length | m | in, ft, yd, mi, AU |
+| Mass | g | lb, oz, t, u |
+| Time | s | min, h, d, wk |
+| Electric current | A | — |
+| Frequency | Hz | rpm, deg/s, rad/s |
+| Energy / Power | W, J | cal, hp |
+| Voltage / Impedance | V, Ω, F | — |
+| Humidity | % | — |
+| Informatics | bit, By | Bd |
+| Amount of substance | mol | eq, osm |
+| Luminous intensity | cd | cp, hk |
+| Device operations | cmd | pow_on, pow_off, mv_up, mv_dn, ... |
 
-### 7.2 前缀支持
+### 7.2 Prefix Support
 
-| 前缀 | 因子 | 示例 |
-|------|------|------|
+| Prefix | Factor | Example |
+|--------|--------|---------|
 | G | 10⁹ | GHz |
 | M | 10⁶ | MPa |
 | k | 10³ | kPa, kHz |
@@ -560,10 +562,10 @@ OSTX_UNIT(Celsius)  // → 未定义宏 → 编译错误 ✗
 | Mi | 2²⁰ | MiBy |
 | Gi | 2³⁰ | GiBy |
 
-### 7.3 标准化规则
+### 7.3 Standardization Rules
 
-| 输入单位 | 输入值 | 标准化单位 | 标准化值 |
-|---------|--------|-----------|---------|
+| Input unit | Input value | Standardized unit | Standardized value |
+|------------|-------------|-------------------|--------------------|
 | kPa | 101.325 | Pa | 101325.0 |
 | degF | 77.0 | K | 298.15 |
 | Cel | 25.0 | K | 298.15 |
@@ -572,127 +574,127 @@ OSTX_UNIT(Celsius)  // → 未定义宏 → 编译错误 ✗
 
 ---
 
-## 8. 性能基准
+## 8. Performance Benchmarks
 
-### 8.1 Core（Python 3.11 + 可选 Rust）
+### 8.1 Core (Python 3.11 + optional Rust)
 
-| 指标 | 数值 |
-|------|------|
-| transmit() 吞吐 | ~1000 pps |
+| Metric | Value |
+|--------|-------|
+| transmit() throughput | ~1000 pps |
 | dispatch(UDP) | ~2000 pps |
-| receive() 解压 | ~1500 pps |
-| 管道延迟 | 2-5 ms |
-| 存储开销 | ~1 KB/packet |
+| receive() decompression | ~1500 pps |
+| Pipeline latency | 2–5 ms |
+| Storage overhead | ~1 KB/packet |
 
-### 8.2 FX（ESP32 @ 240 MHz）
+### 8.2 FX (ESP32 @ 240 MHz)
 
-| 指标 | 数值 |
-|------|------|
-| FULL 编码 | <1 ms |
-| DIFF 编码 | <0.5 ms |
-| 默认 DRAM | ~27 KB |
-| 最小配置 | ~1 KB（AVR 4 entries） |
+| Metric | Value |
+|--------|-------|
+| FULL encode | < 1 ms |
+| DIFF encode | < 0.5 ms |
+| Default DRAM | ~27 KB |
+| Minimum config | ~1 KB (AVR 4 entries) |
 
-### 8.3 TX（ATmega328P @ 16 MHz）
+### 8.3 TX (ATmega328P @ 16 MHz)
 
-| 指标 | 数值 |
-|------|------|
-| 帧编码延迟 | ~0.6 ms |
-| 传输速率 (115200 baud) | ~380 fps |
-| API C 栈峰值 | 21 B |
-| API C 最小 Flash | 2 KB |
+| Metric | Value |
+|--------|-------|
+| Frame encode latency | ~0.6 ms |
+| Throughput (115200 baud) | ~380 fps |
+| API C peak stack | 21 B |
+| API C minimum Flash | 2 KB |
 
-### 8.4 RX（AVR @ 16 MHz）
+### 8.4 RX (AVR @ 16 MHz)
 
-| 指标 | 数值 |
-|------|------|
-| 解码延迟 | <0.5 ms |
-| Flash 占用（最小） | 310 B |
-| Flash 占用（完整） | 616 B |
-| 流式解析器 RAM | 102 B |
-| 直接解码栈 | 41 B |
+| Metric | Value |
+|--------|-------|
+| Decode latency | < 0.5 ms |
+| Flash footprint (minimal) | 310 B |
+| Flash footprint (full) | 616 B |
+| Streaming parser RAM | 102 B |
+| Direct decode stack | 41 B |
 
-### 8.5 编码效率
+### 8.5 Encoding Efficiency
 
-| 模式 | 典型帧大小 | 相对原始 JSON |
-|------|-----------|-------------|
-| FULL | 40-80 B | ~30% 原始大小 |
-| DIFF | 20-40 B | ~10-15% 原始大小 |
-| HEART | 15-25 B | ~5-8% 原始大小 |
-
----
-
-## 9. 测试与认证体系
-
-> 详见配套文档：[OpenSynaptic 测试与认证流程](OpenSynaptic_Certification_Process.md)
-
-### 9.1 测试矩阵总览
-
-| 测试域 | Core | FX | RX | TX | 总计 |
-|--------|-----:|----:|----:|----:|-----:|
-| CRC 参考向量 | 1 | 1 | 4 | 5 | **11** |
-| Base62 往返 | 1 | 1 | 6 | 17 | **25** |
-| 帧编解码 | 1 | 2 | 11 | 19 | **33** |
-| 传感器解析 | — | — | 3 | — | **3** |
-| 流式解析器 | — | — | 15 | — | **15** |
-| 模板语法 | — | 1 | — | — | **1** |
-| 融合状态 | — | 1 | — | — | **1** |
-| 标准化 | — | 1 | — | — | **1** |
-| 握手构建 | — | 1 | — | — | **1** |
-| 集成管道 | 9 | 1 | — | — | **10** |
-| 穷举业务 | 985 | — | — | — | **985** |
-| 安全基础 | 43 | — | — | — | **43** |
-| 插件系统 | 205 | — | — | — | **205** |
-| 正交设计 | 24 | — | — | — | **24** |
-| **合计** | **1269** | **9** | **39** | **41** | **1358** |
-
-### 9.2 认证等级
-
-| 等级 | 名称 | 要求 | 通过标准 |
-|------|------|------|---------|
-| **L1** | Wire Compatible | CRC + Base62 + 帧结构参考向量 | 69/69 向量全通过 |
-| **L2** | Protocol Conformant | L1 + 跨实现帧交换互验 | FX 编码 ↔ Core 解码通过 |
-| **L3** | Fusion Certified | L2 + FULL/DIFF/HEART 策略正确性 | 策略序列与 Core 参考一致 |
-| **L4** | Security Validated | L3 + 握手/会话/防重放 | 43 项安全测试全通过 |
-| **L5** | Full Ecosystem | L4 + 全穷举测试套件 | 1353/1358（≥99.5%） |
+| Mode | Typical frame size | Relative to raw JSON |
+|------|--------------------|----------------------|
+| FULL | 40–80 B | ~30% of original |
+| DIFF | 20–40 B | ~10–15% of original |
+| HEART | 15–25 B | ~5–8% of original |
 
 ---
 
-## 附录
+## 9. Testing and Certification System
 
-### 附录 A：协议版本兼容性
+> See companion document: [OpenSynaptic Testing and Certification Process](OpenSynaptic_Certification_Process.md)
 
-| 协议版本 | Core | FX | RX | TX | 说明 |
-|---------|------|-----|-----|-----|------|
-| v1.0 | ✅ | ✅ | ✅ | ✅ | 当前版本 |
+### 9.1 Test Matrix Overview
 
-### 附录 B：已知设计限制
+| Test Domain | Core | FX | RX | TX | Total |
+|------------|-----:|---:|---:|---:|------:|
+| CRC reference vectors | 1 | 1 | 4 | 5 | **11** |
+| Base62 round-trip | 1 | 1 | 6 | 17 | **25** |
+| Frame encode/decode | 1 | 2 | 11 | 19 | **33** |
+| Sensor parsing | — | — | 3 | — | **3** |
+| Streaming parser | — | — | 15 | — | **15** |
+| Template syntax | — | 1 | — | — | **1** |
+| Fusion strategy | — | 1 | — | — | **1** |
+| Standardization | — | 1 | — | — | **1** |
+| Handshake construction | — | 1 | — | — | **1** |
+| Integration pipeline | 9 | 1 | — | — | **10** |
+| Exhaustive business logic | 985 | — | — | — | **985** |
+| Security infrastructure | 43 | — | — | — | **43** |
+| Plugin system | 205 | — | — | — | **205** |
+| Orthogonal design | 24 | — | — | — | **24** |
+| **Total** | **1269** | **9** | **39** | **41** | **1358** |
 
-| 编号 | 限制 | 影响范围 | 处置 |
-|------|------|---------|------|
-| KL-01 | Base62 int64 上限 9.22×10¹⁴ | mol=6.022e+23 被跳过 | 设计决策：SKIP |
-| KL-02 | RX 仅暴露 32 位时间戳 | 2106 年后溢出 | 可接受 |
-| KL-03 | TX/RX int32 范围 | 值域 ±214748.3647 | 覆盖 99% 传感器量程 |
-| KL-04 | RX 仅支持 DATA_FULL 解码 | 无 DIFF/HEART | 设计决策：最小足迹 |
+### 9.2 Certification Levels
 
-### 附录 C：术语表
-
-| 术语 | 定义 |
-|------|------|
-| AID | Assigned ID，由中枢分配的 32 位设备标识 |
-| TID | Template/Transaction ID，模板或事务标识 |
-| UCUM | Unified Code for Units of Measure，国际通用计量单位规范 |
-| Fusion | 融合引擎，FULL/DIFF/HEART 策略选择模块 |
-| Base62 | 使用 62 字符集（0-9a-zA-Z）的位置编码系统 |
-| Wire Frame | 线级帧，二进制数据包的完整字节序列表示 |
-
-### 附录 D：参考文献
-
-1. UCUM 规范：https://ucum.org/ucum
-2. CRC-16/CCITT-FALSE：ITU-T V.41
-3. Base64url：RFC 4648 §5
-4. OpenSynaptic GitHub：https://github.com/OpenSynaptic
+| Level | Name | Requirement | Pass Criteria |
+|-------|------|-------------|---------------|
+| **L1** | Wire Compatible | CRC + Base62 + frame structure reference vectors | 69/69 vectors pass |
+| **L2** | Protocol Conformant | L1 + cross-implementation frame exchange | FX encode ↔ Core decode passes |
+| **L3** | Fusion Certified | L2 + FULL/DIFF/HEART strategy correctness | Strategy sequence matches Core reference |
+| **L4** | Security Validated | L3 + handshake/session/anti-replay | All 43 security tests pass |
+| **L5** | Full Ecosystem | L4 + full exhaustive test suite | 1353/1358 (≥99.5%) |
 
 ---
 
-*本文档由 OpenSynaptic 项目自动化认证工具生成和维护。*
+## Appendices
+
+### Appendix A: Protocol Version Compatibility
+
+| Protocol version | Core | FX | RX | TX | Notes |
+|-----------------|------|-----|-----|-----|-------|
+| v1.0 | ✅ | ✅ | ✅ | ✅ | Current version |
+
+### Appendix B: Known Design Limitations
+
+| ID | Limitation | Scope | Disposition |
+|----|------------|-------|-------------|
+| KL-01 | Base62 int64 upper limit 9.22×10¹⁴ | mol = 6.022e+23 skipped | Design decision: SKIP |
+| KL-02 | RX exposes only 32-bit timestamp | Overflow after year 2106 | Acceptable |
+| KL-03 | TX/RX int32 range | Value domain ±214748.3647 | Covers 99% of sensor ranges |
+| KL-04 | RX supports DATA_FULL decode only | No DIFF/HEART support | Design decision: minimal footprint |
+
+### Appendix C: Glossary
+
+| Term | Definition |
+|------|-----------|
+| AID | Assigned ID — 32-bit device identifier allocated by the hub |
+| TID | Template/Transaction ID — template or transaction identifier |
+| UCUM | Unified Code for Units of Measure — international unit coding standard |
+| Fusion | Fusion Engine — FULL/DIFF/HEART strategy selection module |
+| Base62 | Positional encoding system using 62-character set (0–9a–zA–Z) |
+| Wire Frame | Wire-level frame — complete byte sequence representation of a binary packet |
+
+### Appendix D: References
+
+1. UCUM Specification: https://ucum.org/ucum
+2. CRC-16/CCITT-FALSE: ITU-T V.41
+3. Base64url: RFC 4648 §5
+4. OpenSynaptic GitHub: https://github.com/OpenSynaptic
+
+---
+
+*This document is generated and maintained by the OpenSynaptic project automated certification tooling.*

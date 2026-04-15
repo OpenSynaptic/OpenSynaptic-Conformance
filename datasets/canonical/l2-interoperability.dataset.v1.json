@@ -9,7 +9,7 @@
   "datasetClass": "canonical",
   "source": {
     "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
-    "section": "4. L2 Protocol Conformant 认证"
+    "section": "4. L2 Protocol Conformant Certification"
   },
   "appliesTo": [
     "core",

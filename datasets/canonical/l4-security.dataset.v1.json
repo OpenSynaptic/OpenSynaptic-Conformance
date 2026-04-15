@@ -9,7 +9,7 @@
   "datasetClass": "canonical",
   "source": {
     "path": "../../docs/certification/OpenSynaptic_Certification_Process.md",
-    "section": "6. L4 Security Validated 认证"
+    "section": "6. L4 Security Validated Certification"
   },
   "appliesTo": [
     "core",

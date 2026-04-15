@@ -10,6 +10,7 @@ Expected contents include:
 - report templates and official baseline publication rules
 - guidance on how future public certification may reference conformance versions
 
-Current document:
+Current documents:
 
-- [OpenSynaptic Certification Process](OpenSynaptic_Certification_Process.md)
+- [OpenSynaptic Testing and Certification Process](OpenSynaptic_Certification_Process.md) — English (canonical)
+- [OpenSynaptic 测试与认证流程](OpenSynaptic_Certification_Process_zh.md) — 中文
